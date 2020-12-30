@@ -74,6 +74,7 @@ build/
 *.la
 *~
 *.pdf
+!Database-System-Concepts-7th-Edition.pdf
 *.swp
 a.out
 
