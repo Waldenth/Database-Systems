@@ -1,3 +1,7 @@
+mirror repository of https://github.com/cmu-db/bustub
+
+---
+
 schedule at https://15445.courses.cs.cmu.edu/fall2019/schedule.html
 
 assignments at https://15445.courses.cs.cmu.edu/fall2020/assignments.html
