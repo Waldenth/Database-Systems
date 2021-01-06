@@ -7,6 +7,7 @@
 #==============================================================================#
 # Temp files created by most text editors.
 *~
+.clion*
 # Merge files created by git.
 *.orig
 # Java bytecode
