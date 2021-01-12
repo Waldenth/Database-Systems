@@ -15,7 +15,7 @@ video available at [Youtube](https://www.youtube.com/playlist?list=PLSE8ODhjZXjb
 Progress
 
 - [ ] Lecture #01: Course Introduction and the Relational Model
-  - [ ] Readings: Chapters 1-2, 27
+  - [x] Readings: Chapters 1-2, 27
   - [ ] Video
 - [ ] Lecture #02: Advanced SQL
   - [ ] Readings: Chapters 3-5
