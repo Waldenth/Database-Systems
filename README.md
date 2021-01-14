@@ -2,7 +2,7 @@ mirror repository of https://github.com/cmu-db/bustub
 
 ---
 
-schedule at https://15445.courses.cs.cmu.edu/fall2019/schedule.html
+schedule at https://15445.courses.cs.cmu.edu/fall2020/schedule.html
 
 assignments at https://15445.courses.cs.cmu.edu/fall2020/assignments.html
 
@@ -24,9 +24,9 @@ Projects
 
 Progress
 
-- [ ] Lecture #01: Course Introduction and the Relational Model
+- [x] Lecture #01: Course Introduction and the Relational Model
   - [x] Readings: Chapters 1-2, 27
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #02: Advanced SQL
   - [ ] Readings: Chapters 3-5
   - [ ] Video
