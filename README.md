@@ -28,7 +28,7 @@ Progress
   - [x] Readings: Chapters 1-2, 27
   - [x] Video
 - [ ] Lecture #02: Advanced SQL
-  - [ ] Readings: Chapters 3-5
+  - [x] Readings: Chapters 3-5
   - [ ] Video
 - [ ] Lecture #03: Database Storage I
   - [ ] Readings: Chapter 12.1-12.4, 13.2-13.3
