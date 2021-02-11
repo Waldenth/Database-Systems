@@ -27,9 +27,9 @@ Progress
 - [x] Lecture #01: Course Introduction and the Relational Model
   - [x] Readings: Chapters 1-2, 27
   - [x] Video
-- [ ] Lecture #02: Advanced SQL
+- [x] Lecture #02: Advanced SQL
   - [x] Readings: Chapters 3-5
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #03: Database Storage I
   - [ ] Readings: Chapter 12.1-12.4, 13.2-13.3
   - [ ] Video
