@@ -31,7 +31,7 @@ Progress
   - [x] Readings: Chapters 3-5
   - [x] Video
 - [ ] Lecture #03: Database Storage I
-  - [ ] Readings: Chapter 12.1-12.4, 13.2-13.3
+  - [x] Readings: Chapter 12.1-12.4, 13.2-13.3
   - [ ] Video
 - [ ] Lecture #04: Database Storage II
   - [ ] Video
