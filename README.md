@@ -30,9 +30,9 @@ Progress
 - [x] Lecture #02: Advanced SQL
   - [x] Readings: Chapters 3-5
   - [x] Video
-- [ ] Lecture #03: Database Storage I
+- [x] Lecture #03: Database Storage I
   - [x] Readings: Chapter 12.1-12.4, 13.2-13.3
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #04: Database Storage II
   - [ ] Video
 - [ ] Lecture #05: Buffer Pools
