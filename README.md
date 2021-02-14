@@ -33,8 +33,8 @@ Progress
 - [x] Lecture #03: Database Storage I
   - [x] Readings: Chapter 12.1-12.4, 13.2-13.3
   - [x] Video
-- [ ] Lecture #04: Database Storage II
-  - [ ] Video
+- [x] Lecture #04: Database Storage II
+  - [x] Video
 - [ ] Lecture #05: Buffer Pools
   - [ ] Readings: Chapter 13.2-13.5
   - [ ] Video
