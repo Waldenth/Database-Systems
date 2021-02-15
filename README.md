@@ -35,9 +35,9 @@ Progress
   - [x] Video
 - [x] Lecture #04: Database Storage II
   - [x] Video
-- [ ] Lecture #05: Buffer Pools
+- [x] Lecture #05: Buffer Pools
   - [x] Readings: Chapter 13.2-13.5
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #06: Hash Tables
   - [ ] Readings: Chapter 14.5, 24.5
   - [ ] Video
