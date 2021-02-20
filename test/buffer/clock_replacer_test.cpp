@@ -60,7 +60,7 @@ TEST(ClockReplacerTest, SampleTest) {
 }
 
 TEST(ClockReplacerTest, CornerCaseTest) {
-  ClockReplacer clock_replacer(3);
+  ClockReplacer clock_replacer(4);
   int value;
   bool result = clock_replacer.Victim(&value);
   EXPECT_FALSE(result);

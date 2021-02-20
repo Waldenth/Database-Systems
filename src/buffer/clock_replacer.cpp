@@ -17,8 +17,8 @@
 namespace bustub {
 
 ClockReplacer::ClockReplacer(size_t num_pages)
-    : circular{num_pages + 1, ClockReplacer::Status::EMPTY}, hand{0}, capacity{num_pages + 1} {
-  circular.reserve(num_pages + 1);
+    : circular{num_pages, ClockReplacer::Status::EMPTY}, hand{0}, capacity{num_pages} {
+  circular.reserve(num_pages);
 }
 
 ClockReplacer::~ClockReplacer() = default;
