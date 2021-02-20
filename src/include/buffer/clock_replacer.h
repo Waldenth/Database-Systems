@@ -12,7 +12,6 @@
 
 #pragma once
 
-#include <list>
 #include <mutex>  // NOLINT
 #include <vector>
 
@@ -26,6 +25,7 @@ namespace bustub {
  */
 class ClockReplacer : public Replacer {
  public:
+  enum class Status { EMPTY, ACCESSED, UNTOUCHED };
   /**
    * Create a new ClockReplacer.
    * @param num_pages the maximum number of pages the ClockReplacer will be required to store
@@ -47,6 +47,9 @@ class ClockReplacer : public Replacer {
 
  private:
   // TODO(student): implement me!
+  std::vector<Status> circular;
+  frame_id_t hand;
+  size_t capacity;
 };
 
 }  // namespace bustub
