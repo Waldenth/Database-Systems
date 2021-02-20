@@ -59,4 +59,25 @@ TEST(ClockReplacerTest, SampleTest) {
   EXPECT_EQ(4, value);
 }
 
+TEST(ClockReplacerTest, CornerCaseTest) {
+  ClockReplacer clock_replacer(3);
+  int value;
+  bool result = clock_replacer.Victim(&value);
+  EXPECT_FALSE(result);
+
+  clock_replacer.Unpin(3);
+  clock_replacer.Unpin(2);
+  EXPECT_EQ(2, clock_replacer.Size());
+  clock_replacer.Victim(&value);
+  EXPECT_EQ(2, value);
+  clock_replacer.Unpin(1);
+  EXPECT_EQ(2, clock_replacer.Size());
+  clock_replacer.Victim(&value);
+  EXPECT_EQ(3, value);
+  clock_replacer.Victim(&value);
+  EXPECT_EQ(1, value);
+  EXPECT_FALSE(clock_replacer.Victim(&value));
+  EXPECT_EQ(0, clock_replacer.Size());
+}
+
 }  // namespace bustub
