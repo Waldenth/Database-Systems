@@ -11,27 +11,30 @@
 //===----------------------------------------------------------------------===//
 
 #include <algorithm>
+#include <mutex>
 
 #include "buffer/clock_replacer.h"
 
 namespace bustub {
 
 ClockReplacer::ClockReplacer(size_t num_pages)
-    : circular{num_pages, ClockReplacer::Status::EMPTY}, hand{0}, capacity{num_pages} {
-  circular.reserve(num_pages);
+    : circular_{num_pages, ClockReplacer::Status::EMPTY}, hand_{0}, capacity_{num_pages} {
+  circular_.reserve(num_pages);
 }
 
 ClockReplacer::~ClockReplacer() = default;
 
 bool ClockReplacer::Victim(frame_id_t *frame_id) {
+  const std::lock_guard<mutex_t> guard(mutex_);
+
   size_t unempty_count = 0;
   frame_id_t victim_frame_id = 0;
 
-  for (size_t i = 0, idx = (hand + i + 1) % capacity; i < capacity; i++, idx = (hand + i + 1) % capacity) {
-    if (circular[idx] == ClockReplacer::Status::ACCESSED) {
+  for (size_t i = 1, idx = (hand_ + i) % capacity_; i < capacity_+1; i++, idx = (hand_ + i) % capacity_) {
+    if (circular_[idx] == ClockReplacer::Status::ACCESSED) {
       unempty_count++;
-      circular[idx] = ClockReplacer::Status::UNTOUCHED;
-    } else if (circular[idx] == ClockReplacer::Status::UNTOUCHED) {
+      circular_[idx] = ClockReplacer::Status::UNTOUCHED;
+    } else if (circular_[idx] == ClockReplacer::Status::UNTOUCHED) {
       unempty_count++;
       victim_frame_id = victim_frame_id ? victim_frame_id : idx;
     }
@@ -43,8 +46,8 @@ bool ClockReplacer::Victim(frame_id_t *frame_id) {
   }
 
   if (!victim_frame_id) {
-    for (size_t i = 0, idx = (hand + i + 1) % capacity; i < capacity; i++, idx = (hand + i + 1) % capacity) {
-      if (circular[idx] == ClockReplacer::Status::UNTOUCHED) {
+    for (size_t i = 1, idx = (hand_ + i) % capacity_; i < capacity_+1; i++, idx = (hand_ + i) % capacity_) {
+      if (circular_[idx] == ClockReplacer::Status::UNTOUCHED) {
         victim_frame_id = idx;
         break;
       }
@@ -52,19 +55,29 @@ bool ClockReplacer::Victim(frame_id_t *frame_id) {
   }
 
   *frame_id = victim_frame_id;
-  hand = victim_frame_id;
+  hand_ = victim_frame_id;
 
-  circular[victim_frame_id % capacity] = ClockReplacer::Status::EMPTY;
+  circular_[victim_frame_id % capacity_] = ClockReplacer::Status::EMPTY;
 
   return true;
 }
 
-void ClockReplacer::Pin(frame_id_t frame_id) { circular[frame_id % capacity] = ClockReplacer::Status::EMPTY; }
+void ClockReplacer::Pin(frame_id_t frame_id) {
+  const std::lock_guard<mutex_t> guard(mutex_);
 
-void ClockReplacer::Unpin(frame_id_t frame_id) { circular[frame_id % capacity] = ClockReplacer::Status::ACCESSED; }
+  circular_[frame_id % capacity_] = ClockReplacer::Status::EMPTY;
+}
+
+void ClockReplacer::Unpin(frame_id_t frame_id) {
+  const std::lock_guard<mutex_t> guard(mutex_);
+
+  circular_[frame_id % capacity_] = ClockReplacer::Status::ACCESSED;
+}
 
 size_t ClockReplacer::Size() {
-  return std::count_if(circular.begin(), circular.end(),
+  const std::lock_guard<mutex_t> guard(mutex_);
+
+  return std::count_if(circular_.begin(), circular_.end(),
                        [](ClockReplacer::Status status) { return status != ClockReplacer::Status::EMPTY; });
 }
 

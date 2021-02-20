@@ -24,6 +24,7 @@ namespace bustub {
  * ClockReplacer implements the clock replacement policy, which approximates the Least Recently Used policy.
  */
 class ClockReplacer : public Replacer {
+  using mutex_t = std::mutex;
  public:
   enum class Status { EMPTY, ACCESSED, UNTOUCHED };
   /**
@@ -47,9 +48,10 @@ class ClockReplacer : public Replacer {
 
  private:
   // TODO(student): implement me!
-  std::vector<Status> circular;
-  frame_id_t hand;
-  size_t capacity;
+  std::vector<Status> circular_;
+  frame_id_t hand_{0};
+  size_t capacity_;
+  mutex_t mutex_;
 };
 
 }  // namespace bustub
