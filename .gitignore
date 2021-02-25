@@ -262,3 +262,5 @@ docs/dev
 
 # Vagrant
 .vagrant
+
+*.zip
