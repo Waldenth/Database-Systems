@@ -20,6 +20,8 @@ Projects
 - [ ] [Query Execution](https://15445.courses.cs.cmu.edu/fall2020/project3/)
 - [ ] [Concurrency Control](https://15445.courses.cs.cmu.edu/fall2020/project4/)
 
+projects can be auto-graded on [gradescope](https://www.gradescope.com/courses/195440) via [access code 5VX7JZ](https://github.com/cmu-db/bustub/issues/111#issuecomment-709673126)
+
 ---
 
 Progress
