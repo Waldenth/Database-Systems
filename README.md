@@ -14,7 +14,7 @@ video available at [Youtube](https://www.youtube.com/playlist?list=PLSE8ODhjZXjb
 
 Projects
 
-- [x] [C++ Primer](https://15445.courses.cs.cmu.edu/fall2020/project0/)
+- [x] [C++ Primer](https://15445.courses.cs.cmu.edu/fall2020/project0/) [[auto graded result](./auto-graded-result/Project0-C++Primer.jpg)]
 - [ ] [Buffer Pool Manager](https://15445.courses.cs.cmu.edu/fall2020/project1/)
 - [ ] [B+Tree Index](https://15445.courses.cs.cmu.edu/fall2020/project2/)
 - [ ] [Query Execution](https://15445.courses.cs.cmu.edu/fall2020/project3/)
