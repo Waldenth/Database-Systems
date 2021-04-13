@@ -25,6 +25,7 @@ namespace bustub {
  */
 class ClockReplacer : public Replacer {
   using mutex_t = std::mutex;
+
  public:
   enum class Status { EMPTY, ACCESSED, UNTOUCHED };
   /**

@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <algorithm>
-#include <mutex>
 
 #include "buffer/clock_replacer.h"
 
@@ -30,23 +29,23 @@ bool ClockReplacer::Victim(frame_id_t *frame_id) {
   size_t unempty_count = 0;
   frame_id_t victim_frame_id = 0;
 
-  for (size_t i = 1, idx = (hand_ + i) % capacity_; i < capacity_+1; i++, idx = (hand_ + i) % capacity_) {
+  for (size_t i = 1, idx = (hand_ + i) % capacity_; i < capacity_ + 1; i++, idx = (hand_ + i) % capacity_) {
     if (circular_[idx] == ClockReplacer::Status::ACCESSED) {
       unempty_count++;
       circular_[idx] = ClockReplacer::Status::UNTOUCHED;
     } else if (circular_[idx] == ClockReplacer::Status::UNTOUCHED) {
       unempty_count++;
-      victim_frame_id = victim_frame_id ? victim_frame_id : idx;
+      victim_frame_id = victim_frame_id != 0 ? victim_frame_id : idx;
     }
   }
 
-  if (!unempty_count) {
+  if (unempty_count == 0U) {
     frame_id = nullptr;
     return false;
   }
 
-  if (!victim_frame_id) {
-    for (size_t i = 1, idx = (hand_ + i) % capacity_; i < capacity_+1; i++, idx = (hand_ + i) % capacity_) {
+  if (victim_frame_id == 0) {
+    for (size_t i = 1, idx = (hand_ + i) % capacity_; i < capacity_ + 1; i++, idx = (hand_ + i) % capacity_) {
       if (circular_[idx] == ClockReplacer::Status::UNTOUCHED) {
         victim_frame_id = idx;
         break;

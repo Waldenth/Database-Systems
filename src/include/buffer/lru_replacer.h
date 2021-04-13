@@ -14,7 +14,7 @@
 
 #include <list>
 #include <mutex>  // NOLINT
-#include <vector>
+#include <unordered_map>
 
 #include "buffer/replacer.h"
 #include "common/config.h"
@@ -25,6 +25,8 @@ namespace bustub {
  * LRUReplacer implements the lru replacement policy, which approximates the Least Recently Used policy.
  */
 class LRUReplacer : public Replacer {
+  using mutex_t = std::mutex;
+
  public:
   /**
    * Create a new LRUReplacer.
@@ -47,6 +49,10 @@ class LRUReplacer : public Replacer {
 
  private:
   // TODO(student): implement me!
+  mutex_t mutex;
+  size_t capacity;
+  std::list<frame_id_t> lst;
+  std::unordered_map<frame_id_t, std::list<frame_id_t>::iterator> hash;
 };
 
 }  // namespace bustub
