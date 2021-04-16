@@ -6,7 +6,7 @@ schedule at https://15445.courses.cs.cmu.edu/fall2020/schedule.html
 
 assignments at https://15445.courses.cs.cmu.edu/fall2020/assignments.html
 
-video available at [Youtube](https://www.youtube.com/playlist?list=PLSE8ODhjZXjbohkNBWQs_otTrBTrjyohi) for fall 2019
+video available at [YouTube](https://www.youtube.com/playlist?list=PLSE8ODhjZXjbohkNBWQs_otTrBTrjyohi) for fall 2019
 
 <<Database System Concepts 7e>> online chapters at https://www.db-book.com/db7/online-chapters-dir/index.html
 
@@ -15,7 +15,7 @@ video available at [Youtube](https://www.youtube.com/playlist?list=PLSE8ODhjZXjb
 Projects
 
 - [x] [C++ Primer](https://15445.courses.cs.cmu.edu/fall2020/project0/) [[auto graded result](./auto-graded-result/Project0-C++Primer.jpg)]
-- [ ] [Buffer Pool Manager](https://15445.courses.cs.cmu.edu/fall2020/project1/)
+- [x] [Buffer Pool Manager](https://15445.courses.cs.cmu.edu/fall2020/project1/) [[auto graded result](./auto-graded-result/Project1-BufferPoolManager.jpg)]
 - [ ] [B+Tree Index](https://15445.courses.cs.cmu.edu/fall2020/project2/)
 - [ ] [Query Execution](https://15445.courses.cs.cmu.edu/fall2020/project3/)
 - [ ] [Concurrency Control](https://15445.courses.cs.cmu.edu/fall2020/project4/)
