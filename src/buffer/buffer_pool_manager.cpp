@@ -48,9 +48,7 @@ Page *BufferPoolManager::FetchPageImpl(page_id_t page_id) {
   if (table_item_it != page_table_.end()) {
     frame_id = table_item_it->second;
     auto frame = &pages_[frame_id];
-    // page->WLatch();
     ++frame->pin_count_;
-    // page->WUnlatch();
 
     replacer_->Pin(frame_id);
 
@@ -70,12 +68,14 @@ Page *BufferPoolManager::FetchPageImpl(page_id_t page_id) {
 
   if (frame->IsDirty()) {
     disk_manager_->WritePage(frame->GetPageId(), frame->GetData());
+    frame->is_dirty_ = false;
   }
   page_table_.erase(frame->GetPageId());
 
   page_table_.emplace(page_id, frame_id);
 
   frame->page_id_ = page_id;
+
   ++frame->pin_count_;
 
   replacer_->Pin(frame_id);
@@ -98,7 +98,7 @@ bool BufferPoolManager::UnpinPageImpl(page_id_t page_id, bool is_dirty) {
 
   auto pin_count = frame->GetPinCount();
   --frame->pin_count_;
-  frame->is_dirty_ = is_dirty;
+  frame->is_dirty_ |= is_dirty;
 
   if (frame->GetPinCount() == 0) {
     replacer_->Unpin(frame_id);
@@ -121,6 +121,7 @@ bool BufferPoolManager::FlushPageImpl(page_id_t page_id) {
   auto frame = &pages_[table_item_it->second];
 
   disk_manager_->WritePage(frame->GetPageId(), frame->GetData());
+  frame->is_dirty_ = false;
 
   return true;
 }
@@ -159,12 +160,14 @@ Page *BufferPoolManager::NewPageImpl(page_id_t *page_id) {
 
   if (frame->IsDirty()) {
     disk_manager_->WritePage(frame->GetPageId(), frame->GetData());
+    frame->is_dirty_ = false;
   }
   page_table_.erase(frame->GetPageId());
 
   auto new_page_id = disk_manager_->AllocatePage();
 
   frame->page_id_ = new_page_id;
+
   ++frame->pin_count_;
   frame->ResetMemory();
 
@@ -197,7 +200,14 @@ bool BufferPoolManager::DeletePageImpl(page_id_t page_id) {
     return false;
   }
 
+  if (frame->IsDirty()) {
+    disk_manager_->WritePage(frame->GetPageId(), frame->GetData());
+    frame->is_dirty_ = false;
+  }
+
   page_table_.erase(frame->GetPageId());
+
+  disk_manager_->DeallocatePage(page_id);
 
   frame->ResetMemory();
   frame->page_id_ = INVALID_PAGE_ID;
@@ -217,6 +227,7 @@ void BufferPoolManager::FlushAllPagesImpl() {
     auto frame = &pages_[i];
     if (frame->page_id_ != INVALID_PAGE_ID && frame->IsDirty()) {
       disk_manager_->WritePage(frame->GetPageId(), frame->GetData());
+      frame->is_dirty_ = false;
     }
   }
 }
