@@ -40,9 +40,9 @@ Progress
 - [x] Lecture #05: Buffer Pools
   - [x] Readings: Chapter 13.2-13.5
   - [x] Video
-- [ ] Lecture #06: Hash Tables
+- [x] Lecture #06: Hash Tables
   - [x] Readings: Chapter 14.5, 24.5
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #07: Trees Indexes I
   - [ ] Readings: Chapter 14.1-14.4
   - [ ] Video
