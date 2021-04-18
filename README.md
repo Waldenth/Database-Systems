@@ -41,7 +41,7 @@ Progress
   - [x] Readings: Chapter 13.2-13.5
   - [x] Video
 - [ ] Lecture #06: Hash Tables
-  - [ ] Readings: Chapter 14.5, 24.5
+  - [x] Readings: Chapter 14.5, 24.5
   - [ ] Video
 - [ ] Lecture #07: Trees Indexes I
   - [ ] Readings: Chapter 14.1-14.4
