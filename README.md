@@ -46,8 +46,8 @@ Progress
 - [x] Lecture #07: Trees Indexes I
   - [x] Readings: Chapter 14.1-14.4
   - [x] Video
-- [ ] Lecture #08: Trees Indexes II
-  - [ ] Video
+- [x] Lecture #08: Trees Indexes II
+  - [x] Video
 - [ ] Lecture #09: Index Concurrency Control
   - [ ] Readings: Chapter 18.10.2
   - [ ] Video
