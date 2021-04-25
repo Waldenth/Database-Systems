@@ -49,7 +49,7 @@ Progress
 - [x] Lecture #08: Trees Indexes II
   - [x] Video
 - [ ] Lecture #09: Index Concurrency Control
-  - [ ] Readings: Chapter 18.10.2
+  - [x] Readings: Chapter 18.10.2
   - [ ] Video
 - [ ] Lecture #10: Sorting + Aggregations
   - [ ] Readings: Chapter 15.4-15.5
