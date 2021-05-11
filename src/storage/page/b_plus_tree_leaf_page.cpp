@@ -97,7 +97,7 @@ int B_PLUS_TREE_LEAF_PAGE_TYPE::Insert(const KeyType &key, const ValueType &valu
     return GetSize();
   }
 
-  std::move_backward(k_it, k_it + GetSize(), k_it + GetSize() + 1);
+  std::move_backward(k_it, array + GetSize(), array + GetSize() + 1);
 
   k_it->first = key;
   k_it->second = value;

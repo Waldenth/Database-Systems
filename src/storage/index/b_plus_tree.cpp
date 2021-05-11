@@ -200,7 +200,7 @@ void BPLUSTREE_TYPE::InsertIntoParent(BPlusTreePage *old_node, const KeyType &ke
       throw Exception(ExceptionType::OUT_OF_MEMORY, "Cannot allocate new page");
     }
 
-    UpdateRootPageId(1);
+    UpdateRootPageId(0);
 
     InternalPage *new_root = reinterpret_cast<InternalPage *>(page->GetData());
     new_root->Init(root_page_id_, INVALID_PAGE_ID, internal_max_size_);
@@ -348,6 +348,8 @@ Page *BPLUSTREE_TYPE::FindLeafPage(const KeyType &key, bool leftMost) {
     auto sub_i_node_page_id = leftMost ? i_node->ValueAt(0) : i_node->Lookup(key, comparator_);
     buffer_pool_manager_->UnpinPage(page->GetPageId(), false);
 
+    assert(sub_i_node_page_id > 0);
+
     page = buffer_pool_manager_->FetchPage(sub_i_node_page_id);
     node = reinterpret_cast<BPlusTreePage *>(page->GetData());
   }
@@ -384,9 +386,7 @@ INDEX_TEMPLATE_ARGUMENTS
 void BPLUSTREE_TYPE::InsertFromFile(const std::string &file_name, Transaction *transaction) {
   int64_t key;
   std::ifstream input(file_name);
-  while (input) {
-    input >> key;
-
+  while (input >> key) {
     KeyType index_key;
     index_key.SetFromInteger(key);
     RID rid(key);
@@ -401,8 +401,7 @@ INDEX_TEMPLATE_ARGUMENTS
 void BPLUSTREE_TYPE::RemoveFromFile(const std::string &file_name, Transaction *transaction) {
   int64_t key;
   std::ifstream input(file_name);
-  while (input) {
-    input >> key;
+  while (input >> key) {
     KeyType index_key;
     index_key.SetFromInteger(key);
     Remove(index_key, transaction);

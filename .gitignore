@@ -264,3 +264,6 @@ docs/dev
 .vagrant
 
 *.zip
+
+test.db
+test.log

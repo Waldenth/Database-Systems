@@ -1,0 +1,106 @@
+digraph G {
+INT_15[shape=plain color=pink label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="2">P=15</TD></TR>
+<TR><TD COLSPAN="2">max_size=3,min_size=1</TD></TR>
+<TR><TD PORT="p10"> </TD>
+<TD PORT="p14">2</TD>
+</TR></TABLE>>];
+INT_10[shape=plain color=pink label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="1">P=10</TD></TR>
+<TR><TD COLSPAN="1">max_size=3,min_size=1</TD></TR>
+<TR><TD PORT="p6"> </TD>
+</TR></TABLE>>];
+INT_15:p10 -> INT_10;
+INT_6[shape=plain color=pink label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="1">P=6</TD></TR>
+<TR><TD COLSPAN="1">max_size=3,min_size=1</TD></TR>
+<TR><TD PORT="p3"> </TD>
+</TR></TABLE>>];
+INT_10:p6 -> INT_6;
+INT_3[shape=plain color=pink label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="1">P=3</TD></TR>
+<TR><TD COLSPAN="1">max_size=3,min_size=1</TD></TR>
+<TR><TD PORT="p1"> </TD>
+</TR></TABLE>>];
+INT_6:p3 -> INT_3;
+LEAF_1[shape=plain color=green label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="1">P=1</TD></TR>
+<TR><TD COLSPAN="1">max_size=2,min_size=1</TD></TR>
+<TR><TD>1</TD>
+</TR></TABLE>>];
+LEAF_1 -> LEAF_2;
+{rank=same LEAF_1 LEAF_2};
+INT_3:p1 -> LEAF_1;
+INT_14[shape=plain color=pink label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="2">P=14</TD></TR>
+<TR><TD COLSPAN="2">max_size=3,min_size=1</TD></TR>
+<TR><TD PORT="p9"> </TD>
+<TD PORT="p13">3</TD>
+</TR></TABLE>>];
+INT_15:p14 -> INT_14;
+INT_9[shape=plain color=pink label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="1">P=9</TD></TR>
+<TR><TD COLSPAN="1">max_size=3,min_size=1</TD></TR>
+<TR><TD PORT="p5"> </TD>
+</TR></TABLE>>];
+INT_14:p9 -> INT_9;
+INT_5[shape=plain color=pink label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="1">P=5</TD></TR>
+<TR><TD COLSPAN="1">max_size=3,min_size=1</TD></TR>
+<TR><TD PORT="p2"> </TD>
+</TR></TABLE>>];
+INT_9:p5 -> INT_5;
+LEAF_2[shape=plain color=green label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="1">P=2</TD></TR>
+<TR><TD COLSPAN="1">max_size=2,min_size=1</TD></TR>
+<TR><TD>2</TD>
+</TR></TABLE>>];
+LEAF_2 -> LEAF_4;
+{rank=same LEAF_2 LEAF_4};
+INT_5:p2 -> LEAF_2;
+INT_13[shape=plain color=pink label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="2">P=13</TD></TR>
+<TR><TD COLSPAN="2">max_size=3,min_size=1</TD></TR>
+<TR><TD PORT="p8"> </TD>
+<TD PORT="p12">4</TD>
+</TR></TABLE>>];
+INT_14:p13 -> INT_13;
+INT_8[shape=plain color=pink label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="1">P=8</TD></TR>
+<TR><TD COLSPAN="1">max_size=3,min_size=1</TD></TR>
+<TR><TD PORT="p4"> </TD>
+</TR></TABLE>>];
+INT_13:p8 -> INT_8;
+LEAF_4[shape=plain color=green label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="1">P=4</TD></TR>
+<TR><TD COLSPAN="1">max_size=2,min_size=1</TD></TR>
+<TR><TD>3</TD>
+</TR></TABLE>>];
+LEAF_4 -> LEAF_7;
+{rank=same LEAF_4 LEAF_7};
+INT_8:p4 -> LEAF_4;
+INT_12[shape=plain color=pink label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="2">P=12</TD></TR>
+<TR><TD COLSPAN="2">max_size=3,min_size=1</TD></TR>
+<TR><TD PORT="p7"> </TD>
+<TD PORT="p11">5</TD>
+</TR></TABLE>>];
+INT_13:p12 -> INT_12;
+LEAF_7[shape=plain color=green label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="1">P=7</TD></TR>
+<TR><TD COLSPAN="1">max_size=2,min_size=1</TD></TR>
+<TR><TD>4</TD>
+</TR></TABLE>>];
+LEAF_7 -> LEAF_11;
+{rank=same LEAF_7 LEAF_11};
+INT_12:p7 -> LEAF_7;
+LEAF_11[shape=plain color=green label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="1">P=11</TD></TR>
+<TR><TD COLSPAN="1">max_size=2,min_size=1</TD></TR>
+<TR><TD>5</TD>
+</TR></TABLE>>];
+INT_12:p11 -> LEAF_11;
+{rank=same INT_8 INT_12};
+{rank=same INT_9 INT_13};
+{rank=same INT_10 INT_14};
+}

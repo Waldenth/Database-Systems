@@ -1,0 +1,4 @@
+3 3
+f input.txt
+g tree.dot
+q
