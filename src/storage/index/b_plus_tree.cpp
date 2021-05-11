@@ -308,12 +308,16 @@ bool BPLUSTREE_TYPE::AdjustRoot(BPlusTreePage *old_root_node) { return false; }
  * INDEX ITERATOR
  *****************************************************************************/
 /*
- * Input parameter is void, find the leaftmost leaf page first, then construct
+ * Input parameter is void, find the leftmost leaf page first, then construct
  * index iterator
  * @return : index iterator
  */
 INDEX_TEMPLATE_ARGUMENTS
-INDEXITERATOR_TYPE BPLUSTREE_TYPE::begin() { return INDEXITERATOR_TYPE(); }
+INDEXITERATOR_TYPE BPLUSTREE_TYPE::begin() {
+  auto leftmost_page = FindLeafPage(KeyType(), true);
+  LeafPage *leaf_node = reinterpret_cast<LeafPage *>(leftmost_page->GetData());
+  return INDEXITERATOR_TYPE(buffer_pool_manager_, leaf_node, 0);
+}
 
 /*
  * Input parameter is low key, find the leaf page that contains the input key
@@ -321,7 +325,12 @@ INDEXITERATOR_TYPE BPLUSTREE_TYPE::begin() { return INDEXITERATOR_TYPE(); }
  * @return : index iterator
  */
 INDEX_TEMPLATE_ARGUMENTS
-INDEXITERATOR_TYPE BPLUSTREE_TYPE::Begin(const KeyType &key) { return INDEXITERATOR_TYPE(); }
+INDEXITERATOR_TYPE BPLUSTREE_TYPE::Begin(const KeyType &key) {
+  auto leaf_page = FindLeafPage(key);
+  LeafPage *leaf_node = reinterpret_cast<LeafPage *>(leaf_page->GetData());
+  auto idx = leaf_node->KeyIndex(key, comparator_);
+  return INDEXITERATOR_TYPE(buffer_pool_manager_, leaf_node, idx);
+}
 
 /*
  * Input parameter is void, construct an index iterator representing the end
@@ -329,7 +338,11 @@ INDEXITERATOR_TYPE BPLUSTREE_TYPE::Begin(const KeyType &key) { return INDEXITERA
  * @return : index iterator
  */
 INDEX_TEMPLATE_ARGUMENTS
-INDEXITERATOR_TYPE BPLUSTREE_TYPE::end() { return INDEXITERATOR_TYPE(); }
+INDEXITERATOR_TYPE BPLUSTREE_TYPE::end() {
+  auto rightmost_page = FindLeafPage(KeyType(), false, true);
+  LeafPage *leaf_node = reinterpret_cast<LeafPage *>(rightmost_page->GetData());
+  return INDEXITERATOR_TYPE(buffer_pool_manager_, leaf_node, leaf_node->GetSize());
+}
 
 /*****************************************************************************
  * UTILITIES AND DEBUG
@@ -339,13 +352,15 @@ INDEXITERATOR_TYPE BPLUSTREE_TYPE::end() { return INDEXITERATOR_TYPE(); }
  * the left most leaf page
  */
 INDEX_TEMPLATE_ARGUMENTS
-Page *BPLUSTREE_TYPE::FindLeafPage(const KeyType &key, bool leftMost) {
+Page *BPLUSTREE_TYPE::FindLeafPage(const KeyType &key, bool leftMost, bool rightMost) {
   auto page = buffer_pool_manager_->FetchPage(root_page_id_);
   BPlusTreePage *node = reinterpret_cast<BPlusTreePage *>(page->GetData());
 
   while (!node->IsLeafPage()) {
     InternalPage *i_node = reinterpret_cast<InternalPage *>(node);
-    auto sub_i_node_page_id = leftMost ? i_node->ValueAt(0) : i_node->Lookup(key, comparator_);
+    auto sub_i_node_page_id = leftMost    ? i_node->ValueAt(0)
+                              : rightMost ? i_node->ValueAt(i_node->GetSize() - 1)
+                                          : i_node->Lookup(key, comparator_);
     buffer_pool_manager_->UnpinPage(page->GetPageId(), false);
 
     assert(sub_i_node_page_id > 0);
