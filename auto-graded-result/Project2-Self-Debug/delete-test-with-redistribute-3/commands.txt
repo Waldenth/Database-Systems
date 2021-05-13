@@ -1,0 +1,6 @@
+5 5
+f insert.txt
+g after-insert-tree.dot
+d 10
+g after-delete-10-tree.dot
+q

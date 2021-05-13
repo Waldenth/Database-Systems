@@ -1,0 +1,36 @@
+digraph G {
+INT_3[shape=plain color=pink label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="3">P=3</TD></TR>
+<TR><TD COLSPAN="3">max_size=5,min_size=2</TD></TR>
+<TR><TD PORT="p1"> </TD>
+<TD PORT="p4">5</TD>
+<TD PORT="p5">7</TD>
+</TR></TABLE>>];
+LEAF_1[shape=plain color=green label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="3">P=1</TD></TR>
+<TR><TD COLSPAN="3">max_size=5,min_size=2</TD></TR>
+<TR><TD>2</TD>
+<TD>3</TD>
+<TD>4</TD>
+</TR></TABLE>>];
+LEAF_1 -> LEAF_4;
+{rank=same LEAF_1 LEAF_4};
+INT_3:p1 -> LEAF_1;
+LEAF_4[shape=plain color=green label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="2">P=4</TD></TR>
+<TR><TD COLSPAN="2">max_size=5,min_size=2</TD></TR>
+<TR><TD>5</TD>
+<TD>6</TD>
+</TR></TABLE>>];
+LEAF_4 -> LEAF_5;
+{rank=same LEAF_4 LEAF_5};
+INT_3:p4 -> LEAF_4;
+LEAF_5[shape=plain color=green label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="3">P=5</TD></TR>
+<TR><TD COLSPAN="3">max_size=5,min_size=2</TD></TR>
+<TR><TD>7</TD>
+<TD>8</TD>
+<TD>9</TD>
+</TR></TABLE>>];
+INT_3:p5 -> LEAF_5;
+}

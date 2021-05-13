@@ -1,0 +1,12 @@
+254 254
+i 1
+i 2
+i 3
+i 4
+i 5
+g after-insert-tree.dot
+d 1
+g after-delete-1-tree.dot
+d 5
+g after-delete-5-tree.dot
+q

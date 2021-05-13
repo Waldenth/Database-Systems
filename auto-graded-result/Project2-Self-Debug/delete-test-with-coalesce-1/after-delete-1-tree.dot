@@ -1,0 +1,10 @@
+digraph G {
+LEAF_1[shape=plain color=green label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+<TR><TD COLSPAN="4">P=1</TD></TR>
+<TR><TD COLSPAN="4">max_size=5,min_size=2</TD></TR>
+<TR><TD>2</TD>
+<TD>3</TD>
+<TD>4</TD>
+<TD>5</TD>
+</TR></TABLE>>];
+}

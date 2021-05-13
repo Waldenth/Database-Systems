@@ -1,5 +1,5 @@
 #!/bin/bash
-zip -r project2c1-submission.zip \
+zip -r project2-submission.zip \
     src/include/buffer/lru_replacer.h \
     src/buffer/lru_replacer.cpp \
     src/include/buffer/buffer_pool_manager.h \
