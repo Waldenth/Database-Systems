@@ -115,8 +115,9 @@ int B_PLUS_TREE_LEAF_PAGE_TYPE::Insert(const KeyType &key, const ValueType &valu
 INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveHalfTo(BPlusTreeLeafPage *recipient) {
   auto start_idx = GetMinSize();
-  SetSize(start_idx);
-  recipient->CopyNFrom(array + start_idx, GetMaxSize() - start_idx);
+  auto moved_size = GetMaxSize() - start_idx;
+  recipient->CopyNFrom(array + start_idx, moved_size);
+  IncreaseSize(-1 * moved_size);
 }
 
 /*
@@ -181,7 +182,7 @@ INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveAllTo(BPlusTreeLeafPage *recipient) {
   recipient->CopyNFrom(array, GetSize());
   recipient->SetNextPageId(GetNextPageId());
-  SetSize(0);
+  IncreaseSize(-1 * GetSize());
 }
 
 /*****************************************************************************

@@ -10,8 +10,9 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <queue>
+#include <mutex>  // NOLINT
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "concurrency/transaction.h"
@@ -22,6 +23,8 @@
 namespace bustub {
 
 #define BPLUSTREE_TYPE BPlusTree<KeyType, ValueType, KeyComparator>
+
+enum class Operation { SEARCH, INSERT, DELETE };
 
 /**
  * Main class providing the API for the Interactive B+ Tree.
@@ -77,7 +80,7 @@ class BPlusTree {
   // read data from file and remove one by one
   void RemoveFromFile(const std::string &file_name, Transaction *transaction = nullptr);
   // expose for test purpose
-  Page *FindLeafPage(const KeyType &key, bool leftMost = false, bool rightMost = false);
+  Page *FindLeafPage(const KeyType &key, bool leftMost = false);
 
  private:
   void StartNewTree(const KeyType &key, const ValueType &value);
@@ -91,17 +94,17 @@ class BPlusTree {
   N *Split(N *node);
 
   template <typename N>
-  bool CoalesceOrRedistribute(N *node, Transaction *transaction = nullptr);
+  bool CoalesceOrRedistribute(N *node, Transaction *transaction = nullptr, bool is_root_page_id_latched = false);
 
   template <typename N>
   bool Coalesce(N **neighbor_node, N **node, BPlusTreeInternalPage<KeyType, page_id_t, KeyComparator> **parent,
-                int index, Transaction *transaction = nullptr);
+                int index, Transaction *transaction = nullptr, bool is_root_page_id_latched = false);
 
   template <typename N>
   void Redistribute(N *neighbor_node, N *node, BPlusTreeInternalPage<KeyType, page_id_t, KeyComparator> *parent,
-                    int index);
+                    int index, bool is_root_page_id_latched = false);
 
-  bool AdjustRoot(BPlusTreePage *node);
+  bool AdjustRoot(BPlusTreePage *node, bool is_root_page_id_latched = false);
 
   void UpdateRootPageId(int insert_record = 0);
 
@@ -110,8 +113,17 @@ class BPlusTree {
 
   void ToString(BPlusTreePage *page, BufferPoolManager *bpm) const;
 
+  void ClearTransactionPageSetAndUnpinEach(Transaction *transaction) const;
+
+  void ClearTransactionPageSet(Transaction *transaction) const;
+
+  std::pair<Page *, bool> FindLeafPageByOperation(const KeyType &key, Operation operation = Operation::SEARCH,
+                                                  Transaction *transaction = nullptr, bool leftMost = false,
+                                                  bool rightMost = false);
+
   // member variable
   std::string index_name_;
+  std::mutex root_page_id_latch;
   page_id_t root_page_id_;
   BufferPoolManager *buffer_pool_manager_;
   KeyComparator comparator_;

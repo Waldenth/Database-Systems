@@ -15,6 +15,7 @@
 #pragma once
 #include "buffer/buffer_pool_manager.h"
 #include "storage/page/b_plus_tree_leaf_page.h"
+#include "storage/page/page.h"
 
 namespace bustub {
 
@@ -26,7 +27,7 @@ class IndexIterator {
 
  public:
   // you may define your own constructor based on your member variables
-  IndexIterator(BufferPoolManager *bpm, LeafPage *leaf, int idx = 0);
+  IndexIterator(BufferPoolManager *bpm, Page *page, int idx = 0);
   ~IndexIterator();
 
   bool isEnd();
@@ -42,7 +43,8 @@ class IndexIterator {
  private:
   // add your own private member variables here
   BufferPoolManager *buffer_pool_manager_;
-  LeafPage *leaf;
+  Page *page;
+  LeafPage *leaf = nullptr;
   int idx = 0;
 };
 

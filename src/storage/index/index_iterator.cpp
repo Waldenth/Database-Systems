@@ -12,11 +12,16 @@ namespace bustub {
  * set your own input parameters
  */
 INDEX_TEMPLATE_ARGUMENTS
-INDEXITERATOR_TYPE::IndexIterator(BufferPoolManager *bpm, LeafPage *leaf, int idx)
-    : buffer_pool_manager_(bpm), leaf(leaf), idx(idx) {}
+INDEXITERATOR_TYPE::IndexIterator(BufferPoolManager *bpm, Page *page, int idx)
+    : buffer_pool_manager_(bpm), page(page), idx(idx) {
+  leaf = reinterpret_cast<LeafPage *>(page->GetData());
+}
 
 INDEX_TEMPLATE_ARGUMENTS
-INDEXITERATOR_TYPE::~IndexIterator() = default;
+INDEXITERATOR_TYPE::~IndexIterator() {
+  page->RUnlatch();
+  buffer_pool_manager_->UnpinPage(page->GetPageId(), false);
+}
 
 INDEX_TEMPLATE_ARGUMENTS
 bool INDEXITERATOR_TYPE::isEnd() { return leaf->GetNextPageId() == INVALID_PAGE_ID && idx == leaf->GetSize(); }
@@ -28,8 +33,13 @@ INDEX_TEMPLATE_ARGUMENTS
 INDEXITERATOR_TYPE &INDEXITERATOR_TYPE::operator++() {
   if (idx == leaf->GetSize() - 1 && leaf->GetNextPageId() != INVALID_PAGE_ID) {
     auto next_page = buffer_pool_manager_->FetchPage(leaf->GetNextPageId());
-    leaf = reinterpret_cast<LeafPage *>(next_page->GetData());
-    buffer_pool_manager_->UnpinPage(next_page->GetPageId(), false);
+
+    next_page->RLatch();
+    page->RUnlatch();
+    buffer_pool_manager_->UnpinPage(page->GetPageId(), false);
+
+    page = next_page;
+    leaf = reinterpret_cast<LeafPage *>(page->GetData());
     idx = 0;
   } else {
     idx++;
