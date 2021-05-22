@@ -16,7 +16,7 @@ Projects
 
 - [x] [C++ Primer](https://15445.courses.cs.cmu.edu/fall2020/project0/) [[auto graded result](./auto-graded-result/Project0-C++Primer.jpg)]
 - [x] [Buffer Pool Manager](https://15445.courses.cs.cmu.edu/fall2020/project1/) [[auto graded result](./auto-graded-result/Project1-BufferPoolManager.jpg)]
-- [ ] [B+Tree Index](https://15445.courses.cs.cmu.edu/fall2020/project2/) [[auto graded result for checkpoint 1](./auto-graded-result/Project2c1-BPlusTreeIndex.jpg)]
+- [x] [B+Tree Index](https://15445.courses.cs.cmu.edu/fall2020/project2/) [[auto graded result for checkpoint 1](./auto-graded-result/Project2c1-BPlusTreeIndex.jpg)] [[auto graded result for checkpoint 2](./auto-graded-result/Project2c2-BPlusTreeIndex.jpg)]
 - [ ] [Query Execution](https://15445.courses.cs.cmu.edu/fall2020/project3/)
 - [ ] [Concurrency Control](https://15445.courses.cs.cmu.edu/fall2020/project4/)
 
