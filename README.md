@@ -52,7 +52,7 @@ Progress
   - [x] Readings: Chapter 18.10.2
   - [x] Video
 - [ ] Lecture #10: Sorting + Aggregations
-  - [ ] Readings: Chapter 15.4-15.5
+  - [x] Readings: Chapter 15.4-15.5
   - [ ] Video
 - [ ] Lecture #11: Joins Algorithms
   - [ ] Readings: Chapter 15.4-15.6
