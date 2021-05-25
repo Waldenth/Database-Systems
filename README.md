@@ -54,9 +54,9 @@ Progress
 - [x] Lecture #10: Sorting + Aggregations
   - [x] Readings: Chapter 15.4-15.5
   - [x] Video
-- [ ] Lecture #11: Joins Algorithms
+- [x] Lecture #11: Joins Algorithms
   - [x] Readings: Chapter 15.4-15.6
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #12: Query Execution I
   - [ ] Readings: Chapter 15.1-15.3, 15.7
   - [ ] Video
