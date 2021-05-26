@@ -58,7 +58,7 @@ Progress
   - [x] Readings: Chapter 15.4-15.6
   - [x] Video
 - [ ] Lecture #12: Query Execution I
-  - [ ] Readings: Chapter 15.1-15.3, 15.7
+  - [x] Readings: Chapter 15.1-15.3, 15.7
   - [ ] Video
 - [ ] Lecture #13: Query Execution II
   - [ ] Readings: Chapter 22
