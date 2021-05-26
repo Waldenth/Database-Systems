@@ -57,9 +57,9 @@ Progress
 - [x] Lecture #11: Joins Algorithms
   - [x] Readings: Chapter 15.4-15.6
   - [x] Video
-- [ ] Lecture #12: Query Execution I
+- [x] Lecture #12: Query Execution I
   - [x] Readings: Chapter 15.1-15.3, 15.7
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #13: Query Execution II
   - [ ] Readings: Chapter 22
   - [ ] Video
