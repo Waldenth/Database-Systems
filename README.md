@@ -60,9 +60,9 @@ Progress
 - [x] Lecture #12: Query Execution I
   - [x] Readings: Chapter 15.1-15.3, 15.7
   - [x] Video
-- [ ] Lecture #13: Query Execution II
-  - [ ] Readings: Chapter 22
-  - [ ] Video
+- [x] Lecture #13: Query Execution II
+  - [x] Readings: Chapter 22 (until 22.6)
+  - [x] Video
 - [ ] Lecture #14: Query Planning & Optimization I
   - [ ] Readings: Chapter 16
   - [ ] Video
