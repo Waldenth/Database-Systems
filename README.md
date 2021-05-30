@@ -64,7 +64,7 @@ Progress
   - [x] Readings: Chapter 22 (until 22.6)
   - [x] Video
 - [ ] Lecture #14: Query Planning & Optimization I
-  - [ ] Readings: Chapter 16
+  - [x] Readings: Chapter 16
   - [ ] Video
 - [ ] Lecture #15: Query Planning & Optimization II
   - [ ] Video
