@@ -63,9 +63,9 @@ Progress
 - [x] Lecture #13: Query Execution II
   - [x] Readings: Chapter 22 (until 22.6)
   - [x] Video
-- [ ] Lecture #14: Query Planning & Optimization I
+- [x] Lecture #14: Query Planning & Optimization I
   - [x] Readings: Chapter 16
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #15: Query Planning & Optimization II
   - [ ] Video
 - [ ] Lecture #16: Concurrency Control Theory
