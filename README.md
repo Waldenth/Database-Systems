@@ -66,8 +66,8 @@ Progress
 - [x] Lecture #14: Query Planning & Optimization I
   - [x] Readings: Chapter 16
   - [x] Video
-- [ ] Lecture #15: Query Planning & Optimization II
-  - [ ] Video
+- [x] Lecture #15: Query Planning & Optimization II
+  - [x] Video
 - [ ] Lecture #16: Concurrency Control Theory
   - [ ] Readings: Chapter 18
   - [ ] Video
