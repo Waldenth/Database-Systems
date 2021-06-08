@@ -46,7 +46,7 @@ class UpdateExecutor : public AbstractExecutor {
 
   bool Next([[maybe_unused]] Tuple *tuple, RID *rid) override;
 
-  /*
+  /**
    * Given an old tuple, creates a new updated tuple based on the updateinfo given in the plan
    * @param old_tup the tuple to be updated
    */
@@ -82,5 +82,7 @@ class UpdateExecutor : public AbstractExecutor {
   const TableMetadata *table_info_;
   /** The child executor to obtain value from. */
   std::unique_ptr<AbstractExecutor> child_executor_;
+
+  std::vector<IndexInfo *> table_indexes;
 };
 }  // namespace bustub

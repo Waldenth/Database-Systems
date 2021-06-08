@@ -527,6 +527,7 @@ std::pair<Page *, bool> BPLUSTREE_TYPE::FindLeafPageByOperation(const KeyType &k
 
   root_page_id_latch.lock();
   auto is_root_page_id_latched = true;
+  assert(root_page_id_ != INVALID_PAGE_ID);
   auto page = buffer_pool_manager_->FetchPage(root_page_id_);
   BPlusTreePage *node = reinterpret_cast<BPlusTreePage *>(page->GetData());
   if (operation == Operation::SEARCH) {

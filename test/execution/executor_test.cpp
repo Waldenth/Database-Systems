@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -32,7 +33,9 @@
 #include "execution/expressions/column_value_expression.h"
 #include "execution/expressions/comparison_expression.h"
 #include "execution/expressions/constant_value_expression.h"
+#include "execution/plans/index_scan_plan.h"
 #include "execution/plans/seq_scan_plan.h"
+#include "execution/plans/update_plan.h"
 #include "gtest/gtest.h"
 #include "storage/b_plus_tree_test_util.h"  // NOLINT
 #include "storage/table/tuple.h"
@@ -71,6 +74,7 @@ class ExecutorTest : public ::testing::Test {
     // Shut down the disk manager and clean up the transaction.
     disk_manager_->ShutDown();
     remove("executor_test.db");
+    remove("executor_test.log");
     delete txn_;
   };
 
@@ -140,7 +144,7 @@ class ExecutorTest : public ::testing::Test {
 };
 
 // NOLINTNEXTLINE
-TEST_F(ExecutorTest, DISABLED_SimpleSeqScanTest) {
+TEST_F(ExecutorTest, SimpleSeqScanTest) {
   // SELECT colA, colB FROM test_1 WHERE colA < 500
 
   // Construct query plan
@@ -158,18 +162,55 @@ TEST_F(ExecutorTest, DISABLED_SimpleSeqScanTest) {
   GetExecutionEngine()->Execute(&plan, &result_set, GetTxn(), GetExecutorContext());
 
   // Verify
-  std::cout << "ColA, ColB" << std::endl;
+  // std::cout << "ColA, ColB" << std::endl;
   for (const auto &tuple : result_set) {
     ASSERT_TRUE(tuple.GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() < 500);
     ASSERT_TRUE(tuple.GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() < 10);
-    std::cout << tuple.GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
-              << tuple.GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
+    // std::cout << tuple.GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
+    //           << tuple.GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
   }
   ASSERT_EQ(result_set.size(), 500);
 }
 
 // NOLINTNEXTLINE
-TEST_F(ExecutorTest, DISABLED_SimpleRawInsertTest) {
+TEST_F(ExecutorTest, SimpleIndexScanTest) {
+  // SELECT colA, colB FROM test_1 WHERE colA < 500
+
+  // Construct query plan
+  TableMetadata *table_info = GetExecutorContext()->GetCatalog()->GetTable("test_1");
+  Schema &schema = table_info->schema_;
+  auto *colA = MakeColumnValueExpression(schema, 0, "colA");
+  auto *colB = MakeColumnValueExpression(schema, 0, "colB");
+  auto *const500 = MakeConstantValueExpression(ValueFactory::GetIntegerValue(500));
+  auto *predicate = MakeComparisonExpression(colA, const500, ComparisonType::LessThan);
+  auto *out_schema = MakeOutputSchema({{"colA", colA}, {"colB", colB}});
+
+  Schema *key_schema = ParseCreateStatement("a bigint");
+  GenericComparator<8> comparator(key_schema);
+  auto index_info = GetExecutorContext()->GetCatalog()->CreateIndex<GenericKey<8>, RID, GenericComparator<8>>(
+      GetTxn(), "index1", "test_1", table_info->schema_, *key_schema, {0}, 8);
+
+  IndexScanPlanNode plan{out_schema, predicate, index_info->index_oid_};
+
+  // Execute
+  std::vector<Tuple> result_set;
+  GetExecutionEngine()->Execute(&plan, &result_set, GetTxn(), GetExecutorContext());
+
+  // Verify
+  // std::cout << "ColA, ColB" << std::endl;
+  for (const auto &tuple : result_set) {
+    ASSERT_TRUE(tuple.GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() < 500);
+    ASSERT_TRUE(tuple.GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() < 10);
+    // std::cout << tuple.GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
+    //           << tuple.GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
+  }
+  ASSERT_EQ(result_set.size(), 500);
+
+  delete key_schema;
+}
+
+// NOLINTNEXTLINE
+TEST_F(ExecutorTest, SimpleRawInsertTest) {
   // INSERT INTO empty_table2 VALUES (100, 10), (101, 11), (102, 12)
   // Create Values to insert
   std::vector<Value> val1{ValueFactory::GetIntegerValue(100), ValueFactory::GetIntegerValue(10)};
@@ -193,28 +234,30 @@ TEST_F(ExecutorTest, DISABLED_SimpleRawInsertTest) {
   std::vector<Tuple> result_set;
   GetExecutionEngine()->Execute(&scan_plan, &result_set, GetTxn(), GetExecutorContext());
 
-  std::cout << "ColA, ColB" << std::endl;
+  // std::cout << "ColA, ColB" << std::endl;
+
+  // Size
+  ASSERT_EQ(result_set.size(), 3);
+
   // First value
   ASSERT_EQ(result_set[0].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>(), 100);
   ASSERT_EQ(result_set[0].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>(), 10);
-  std::cout << result_set[0].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
-            << result_set[0].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
+  // std::cout << result_set[0].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
+  //           << result_set[0].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
   // Second value
   ASSERT_EQ(result_set[1].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>(), 101);
   ASSERT_EQ(result_set[1].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>(), 11);
-  std::cout << result_set[1].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
-            << result_set[1].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
+  // std::cout << result_set[1].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
+  //           << result_set[1].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
   // Third value
   ASSERT_EQ(result_set[2].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>(), 102);
   ASSERT_EQ(result_set[2].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>(), 12);
-  std::cout << result_set[2].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
-            << result_set[2].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
-  // Size
-  ASSERT_EQ(result_set.size(), 3);
+  // std::cout << result_set[2].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
+  //           << result_set[2].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
 }
 
 // NOLINTNEXTLINE
-TEST_F(ExecutorTest, DISABLED_SimpleSelectInsertTest) {
+TEST_F(ExecutorTest, SimpleSelectInsertTest) {
   // INSERT INTO empty_table2 SELECT colA, colB FROM test_1 WHERE colA < 500
   std::unique_ptr<AbstractPlanNode> scan_plan1;
   const Schema *out_schema1;
@@ -251,22 +294,22 @@ TEST_F(ExecutorTest, DISABLED_SimpleSelectInsertTest) {
   GetExecutionEngine()->Execute(scan_plan1.get(), &result_set1, GetTxn(), GetExecutorContext());
   GetExecutionEngine()->Execute(scan_plan2.get(), &result_set2, GetTxn(), GetExecutorContext());
 
+  ASSERT_EQ(result_set1.size(), 500);
   ASSERT_EQ(result_set1.size(), result_set2.size());
   for (size_t i = 0; i < result_set1.size(); ++i) {
     ASSERT_EQ(result_set1[i].GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>(),
               result_set2[i].GetValue(out_schema2, out_schema2->GetColIdx("colA")).GetAs<int32_t>());
     ASSERT_EQ(result_set1[i].GetValue(out_schema1, out_schema1->GetColIdx("colB")).GetAs<int32_t>(),
               result_set2[i].GetValue(out_schema2, out_schema2->GetColIdx("colB")).GetAs<int32_t>());
-    std::cout << result_set1[i].GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>() << ", "
-              << result_set1[i].GetValue(out_schema1, out_schema1->GetColIdx("colB")).GetAs<int32_t>() << ", "
-              << result_set2[i].GetValue(out_schema2, out_schema2->GetColIdx("colA")).GetAs<int32_t>() << ", "
-              << result_set2[i].GetValue(out_schema2, out_schema2->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
+    // std::cout << result_set1[i].GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>() << ", "
+    //           << result_set1[i].GetValue(out_schema1, out_schema1->GetColIdx("colB")).GetAs<int32_t>() << ", "
+    //           << result_set2[i].GetValue(out_schema2, out_schema2->GetColIdx("colA")).GetAs<int32_t>() << ", "
+    //           << result_set2[i].GetValue(out_schema2, out_schema2->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
   }
-  ASSERT_EQ(result_set1.size(), 500);
 }
 
 // NOLINTNEXTLINE
-TEST_F(ExecutorTest, DISABLED_SimpleRawInsertWithIndexTest) {
+TEST_F(ExecutorTest, SimpleRawInsertWithIndexTest) {
   // INSERT INTO empty_table2 VALUES (100, 10), (101, 11), (102, 12)
   // Create Values to insert
   std::vector<Value> val1{ValueFactory::GetIntegerValue(100), ValueFactory::GetIntegerValue(10)};
@@ -295,26 +338,27 @@ TEST_F(ExecutorTest, DISABLED_SimpleRawInsertWithIndexTest) {
   std::vector<Tuple> result_set;
   GetExecutionEngine()->Execute(&scan_plan, &result_set, GetTxn(), GetExecutorContext());
 
-  std::cout << "ColA, ColB" << std::endl;
+  // Size
+  ASSERT_EQ(result_set.size(), 3);
+
+  // std::cout << "ColA, ColB" << std::endl;
   // First value
   ASSERT_EQ(result_set[0].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>(), 100);
   ASSERT_EQ(result_set[0].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>(), 10);
-  std::cout << result_set[0].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
-            << result_set[0].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
+  // std::cout << result_set[0].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
+  //           << result_set[0].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
   // Second value
   ASSERT_EQ(result_set[1].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>(), 101);
   ASSERT_EQ(result_set[1].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>(), 11);
-  std::cout << result_set[1].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
-            << result_set[1].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
+  // std::cout << result_set[1].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
+  //           << result_set[1].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
   // Third value
   ASSERT_EQ(result_set[2].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>(), 102);
   ASSERT_EQ(result_set[2].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>(), 12);
-  std::cout << result_set[2].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
-            << result_set[2].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
-  // Size
-  ASSERT_EQ(result_set.size(), 3);
-  std::vector<RID> rids;
+  // std::cout << result_set[2].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
+  //           << result_set[2].GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
 
+  std::vector<RID> rids;
   // Get RID from index, fetch tuple and then compare
   for (auto &table_tuple : result_set) {
     rids.clear();
@@ -329,14 +373,175 @@ TEST_F(ExecutorTest, DISABLED_SimpleRawInsertWithIndexTest) {
     ASSERT_EQ(indexed_tuple.GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>(),
               table_tuple.GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>());
 
-    std::cout << indexed_tuple.GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
-              << indexed_tuple.GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
+    // std::cout << indexed_tuple.GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>() << ", "
+    //           << indexed_tuple.GetValue(out_schema, out_schema->GetColIdx("colB")).GetAs<int32_t>() << std::endl;
   }
   delete key_schema;
 }
 
 // NOLINTNEXTLINE
-TEST_F(ExecutorTest, DISABLED_SimpleDeleteTest) {
+TEST_F(ExecutorTest, SimpleSelectInsertWithIndexTest) {
+  // INSERT INTO empty_table2 SELECT colA, colB FROM test_1 WHERE colA < 500
+  std::unique_ptr<AbstractPlanNode> scan_plan1;
+  const Schema *out_schema1;
+  {
+    auto table_info = GetExecutorContext()->GetCatalog()->GetTable("test_1");
+    auto &schema = table_info->schema_;
+    auto colA = MakeColumnValueExpression(schema, 0, "colA");
+    auto colB = MakeColumnValueExpression(schema, 0, "colB");
+    auto const500 = MakeConstantValueExpression(ValueFactory::GetIntegerValue(500));
+    auto predicate = MakeComparisonExpression(colA, const500, ComparisonType::LessThan);
+    out_schema1 = MakeOutputSchema({{"colA", colA}, {"colB", colB}});
+    scan_plan1 = std::make_unique<SeqScanPlanNode>(out_schema1, predicate, table_info->oid_);
+  }
+
+  auto table_info = GetExecutorContext()->GetCatalog()->GetTable("empty_table2");
+  Schema *key_schema = ParseCreateStatement("a bigint");
+  GenericComparator<8> comparator(key_schema);
+  auto index_info = GetExecutorContext()->GetCatalog()->CreateIndex<GenericKey<8>, RID, GenericComparator<8>>(
+      GetTxn(), "index1", "empty_table2", table_info->schema_, *key_schema, {0}, 8);
+
+  std::unique_ptr<AbstractPlanNode> insert_plan;
+  { insert_plan = std::make_unique<InsertPlanNode>(scan_plan1.get(), table_info->oid_); }
+  GetExecutionEngine()->Execute(insert_plan.get(), nullptr, GetTxn(), GetExecutorContext());
+
+  // Now iterate through both tables, and make sure they have the same data
+  std::unique_ptr<AbstractPlanNode> scan_plan2;
+  auto &schema = table_info->schema_;
+  const Schema *out_schema2;
+  {
+    auto colA = MakeColumnValueExpression(schema, 0, "colA");
+    auto colB = MakeColumnValueExpression(schema, 0, "colB");
+    out_schema2 = MakeOutputSchema({{"colA", colA}, {"colB", colB}});
+    scan_plan2 = std::make_unique<SeqScanPlanNode>(out_schema2, nullptr, table_info->oid_);
+  }
+  std::vector<Tuple> result_set1;
+  std::vector<Tuple> result_set2;
+  GetExecutionEngine()->Execute(scan_plan1.get(), &result_set1, GetTxn(), GetExecutorContext());
+  GetExecutionEngine()->Execute(scan_plan2.get(), &result_set2, GetTxn(), GetExecutorContext());
+
+  ASSERT_EQ(result_set1.size(), 500);
+  ASSERT_EQ(result_set1.size(), result_set2.size());
+  for (size_t i = 0; i < result_set1.size(); ++i) {
+    ASSERT_EQ(result_set1[i].GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>(),
+              result_set2[i].GetValue(out_schema2, out_schema2->GetColIdx("colA")).GetAs<int32_t>());
+    ASSERT_EQ(result_set1[i].GetValue(out_schema1, out_schema1->GetColIdx("colB")).GetAs<int32_t>(),
+              result_set2[i].GetValue(out_schema2, out_schema2->GetColIdx("colB")).GetAs<int32_t>());
+  }
+
+  std::vector<RID> rids;
+  // Get RID from index, fetch tuple and then compare
+  for (auto &table_tuple : result_set2) {
+    rids.clear();
+    auto index_key = table_tuple.KeyFromTuple(schema, index_info->key_schema_, index_info->index_->GetKeyAttrs());
+    index_info->index_->ScanKey(index_key, &rids, GetTxn());
+    Tuple indexed_tuple;
+    auto fetch_tuple = table_info->table_->GetTuple(rids[0], &indexed_tuple, GetTxn());
+
+    ASSERT_TRUE(fetch_tuple);
+    ASSERT_EQ(indexed_tuple.GetValue(out_schema2, out_schema2->GetColIdx("colA")).GetAs<int32_t>(),
+              table_tuple.GetValue(out_schema2, out_schema2->GetColIdx("colA")).GetAs<int32_t>());
+    ASSERT_EQ(indexed_tuple.GetValue(out_schema2, out_schema2->GetColIdx("colB")).GetAs<int32_t>(),
+              table_tuple.GetValue(out_schema2, out_schema2->GetColIdx("colB")).GetAs<int32_t>());
+  }
+  delete key_schema;
+}
+
+// NOLINTNEXTLINE
+TEST_F(ExecutorTest, SimpleUpdateTest) {
+  // SELECT colA, colB FROM test_1 WHERE colA == 50
+
+  // Construct query plan
+  auto table_info = GetExecutorContext()->GetCatalog()->GetTable("test_1");
+  auto &schema = table_info->schema_;
+  auto colA = MakeColumnValueExpression(schema, 0, "colA");
+  auto colB = MakeColumnValueExpression(schema, 0, "colB");
+  auto const50 = MakeConstantValueExpression(ValueFactory::GetIntegerValue(50));
+  auto predicate = MakeComparisonExpression(colA, const50, ComparisonType::Equal);
+  auto out_schema1 = MakeOutputSchema({{"colA", colA}, {"colB", colB}});
+  auto scan_plan1 = std::make_unique<SeqScanPlanNode>(out_schema1, predicate, table_info->oid_);
+  // index
+  Schema *key_schema = ParseCreateStatement("a bigint");
+  GenericComparator<8> comparator(key_schema);
+  auto index_info = GetExecutorContext()->GetCatalog()->CreateIndex<GenericKey<8>, RID, GenericComparator<8>>(
+      GetTxn(), "index1", "test_1", GetExecutorContext()->GetCatalog()->GetTable("test_1")->schema_, *key_schema, {0},
+      8);
+
+  // Execute scan
+  std::vector<Tuple> result_set;
+  GetExecutionEngine()->Execute(scan_plan1.get(), &result_set, GetTxn(), GetExecutorContext());
+
+  // Verify scan
+  for (const auto &tuple : result_set) {
+    ASSERT_TRUE(tuple.GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>() == 50);
+  }
+  ASSERT_EQ(result_set.size(), 1);
+  Tuple index_key = result_set[0].KeyFromTuple(schema, index_info->key_schema_, index_info->index_->GetKeyAttrs());
+
+  std::vector<RID> rids;
+  index_info->index_->ScanKey(index_key, &rids, GetTxn());
+  ASSERT_EQ(rids.size(), 1);
+
+  Tuple indexed_tuple;
+  auto fetch_tuple = table_info->table_->GetTuple(rids[0], &indexed_tuple, GetTxn());
+  ASSERT_TRUE(fetch_tuple);
+  ASSERT_EQ(indexed_tuple.GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>(), 50);
+
+  auto original_colB_value = indexed_tuple.GetValue(out_schema1, out_schema1->GetColIdx("colB")).GetAs<int32_t>();
+
+  // UPDATE test_1 SET colB = colB + 1  WHERE colA == 50
+  std::unique_ptr<AbstractPlanNode> update_plan1;
+  std::unordered_map<uint32_t, UpdateInfo> update_attrs1{{1, {UpdateType::Add, 1}}};
+  { update_plan1 = std::make_unique<UpdatePlanNode>(scan_plan1.get(), table_info->oid_, update_attrs1); }
+  GetExecutionEngine()->Execute(update_plan1.get(), nullptr, GetTxn(), GetExecutorContext());
+
+  result_set.clear();
+  GetExecutionEngine()->Execute(scan_plan1.get(), &result_set, GetTxn(), GetExecutorContext());
+
+  // Verify updated result
+  ASSERT_EQ(result_set.size(), 1);
+  ASSERT_EQ(result_set[0].GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>(), 50);
+  ASSERT_EQ(result_set[0].GetValue(out_schema1, out_schema1->GetColIdx("colB")).GetAs<int32_t>(),
+            original_colB_value + 1);
+
+  rids.clear();
+  index_info->index_->ScanKey(index_key, &rids, GetTxn());
+  ASSERT_EQ(rids.size(), 1);
+
+  fetch_tuple = table_info->table_->GetTuple(rids[0], &indexed_tuple, GetTxn());
+  ASSERT_TRUE(fetch_tuple);
+  ASSERT_EQ(indexed_tuple.GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>(), 50);
+  ASSERT_EQ(indexed_tuple.GetValue(out_schema1, out_schema1->GetColIdx("colB")).GetAs<int32_t>(),
+            original_colB_value + 1);
+
+  // UPDATE test_1 SET colB = 100 WHERE colA == 50
+  std::unique_ptr<AbstractPlanNode> update_plan2;
+  std::unordered_map<uint32_t, UpdateInfo> update_attrs2{{1, {UpdateType::Set, 100}}};
+  { update_plan2 = std::make_unique<UpdatePlanNode>(scan_plan1.get(), table_info->oid_, update_attrs2); }
+  GetExecutionEngine()->Execute(update_plan2.get(), nullptr, GetTxn(), GetExecutorContext());
+
+  result_set.clear();
+  GetExecutionEngine()->Execute(scan_plan1.get(), &result_set, GetTxn(), GetExecutorContext());
+
+  // Verify updated result
+  ASSERT_EQ(result_set.size(), 1);
+  ASSERT_EQ(result_set[0].GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>(), 50);
+  ASSERT_EQ(result_set[0].GetValue(out_schema1, out_schema1->GetColIdx("colB")).GetAs<int32_t>(), 100);
+
+  rids.clear();
+  index_info->index_->ScanKey(index_key, &rids, GetTxn());
+  ASSERT_EQ(rids.size(), 1);
+
+  fetch_tuple = table_info->table_->GetTuple(rids[0], &indexed_tuple, GetTxn());
+  ASSERT_TRUE(fetch_tuple);
+  ASSERT_EQ(indexed_tuple.GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>(), 50);
+  ASSERT_EQ(indexed_tuple.GetValue(out_schema1, out_schema1->GetColIdx("colB")).GetAs<int32_t>(), 100);
+
+  delete key_schema;
+}
+
+// NOLINTNEXTLINE
+TEST_F(ExecutorTest, SimpleDeleteTest) {
   // SELECT colA FROM test_1 WHERE colA == 50
   // DELETE FROM test_1 WHERE colA == 50
   // SELECT colA FROM test_1 WHERE colA == 50
@@ -361,13 +566,17 @@ TEST_F(ExecutorTest, DISABLED_SimpleDeleteTest) {
   GetExecutionEngine()->Execute(scan_plan1.get(), &result_set, GetTxn(), GetExecutorContext());
 
   // Verify
-  std::cout << "colA" << std::endl;
+  // std::cout << "colA" << std::endl;
   for (const auto &tuple : result_set) {
-    std::cout << tuple.GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>() << std::endl;
+    // std::cout << tuple.GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>() << std::endl;
     ASSERT_TRUE(tuple.GetValue(out_schema1, out_schema1->GetColIdx("colA")).GetAs<int32_t>() == 50);
   }
   ASSERT_EQ(result_set.size(), 1);
-  Tuple index_key = Tuple(result_set[0]);
+  Tuple index_key = result_set[0].KeyFromTuple(schema, index_info->key_schema_, index_info->index_->GetKeyAttrs());
+
+  std::vector<RID> rids;
+  index_info->index_->ScanKey(index_key, &rids, GetTxn());
+  ASSERT_EQ(rids.size(), 1);
 
   std::unique_ptr<AbstractPlanNode> delete_plan;
   { delete_plan = std::make_unique<DeletePlanNode>(scan_plan1.get(), table_info->oid_); }
@@ -377,8 +586,7 @@ TEST_F(ExecutorTest, DISABLED_SimpleDeleteTest) {
   GetExecutionEngine()->Execute(scan_plan1.get(), &result_set, GetTxn(), GetExecutorContext());
   ASSERT_TRUE(result_set.empty());
 
-  std::vector<RID> rids;
-
+  rids.clear();
   index_info->index_->ScanKey(index_key, &rids, GetTxn());
   ASSERT_TRUE(rids.empty());
 
@@ -386,7 +594,7 @@ TEST_F(ExecutorTest, DISABLED_SimpleDeleteTest) {
 }
 
 // NOLINTNEXTLINE
-TEST_F(ExecutorTest, DISABLED_SimpleNestedLoopJoinTest) {
+TEST_F(ExecutorTest, SimpleNestedLoopJoinTest) {
   // SELECT test_1.colA, test_1.colB, test_2.col1, test_2.col3 FROM test_1 JOIN test_2 ON test_1.colA = test_2.col1
   std::unique_ptr<AbstractPlanNode> scan_plan1;
   const Schema *out_schema1;
@@ -434,6 +642,9 @@ TEST_F(ExecutorTest, DISABLED_SimpleNestedLoopJoinTest) {
               << tuple.GetValue(out_final, out_final->GetColIdx("col3")).GetAs<int32_t>() << ", " << std::endl;
   }
 }
+
+// NOLINTNEXTLINE
+TEST_F(ExecutorTest, DISABLED_SimpleIndexNestedLoopJoinTest) { ASSERT_EQ(true, false); }
 
 // NOLINTNEXTLINE
 TEST_F(ExecutorTest, DISABLED_SimpleAggregationTest) {
@@ -545,5 +756,8 @@ TEST_F(ExecutorTest, DISABLED_SimpleGroupByAggregation) {
               << tuple.GetValue(agg_schema, agg_schema->GetColIdx("sumC")).GetAs<int32_t>() << std::endl;
   }
 }
+
+// NOLINTNEXTLINE
+TEST_F(ExecutorTest, DISABLED_SimpleLimitOffsetTest) { ASSERT_EQ(true, false); }
 
 }  // namespace bustub

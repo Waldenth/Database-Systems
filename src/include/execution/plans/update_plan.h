@@ -32,9 +32,9 @@ struct UpdateInfo {
 };
 
 /**
- * UpdatePlannode identifies a table that should be updated.
+ * UpdatePlanNode identifies a table that should be updated.
  * The tuple/tuples to be updated come from the child of the UpdatePlanNode. The child could either be an index scan
- * or a seq scan. To simplify the assignment, UpdatePlannode has at most one child.
+ * or a seq scan. To simplify the assignment, UpdatePlanNode has at most one child.
  */
 class UpdatePlanNode : public AbstractPlanNode {
  public:
@@ -52,7 +52,7 @@ class UpdatePlanNode : public AbstractPlanNode {
   /** @return the identifier of the table that should be updated */
   table_oid_t TableOid() const { return table_oid_; }
 
-  /** @return the child plan providing tuples to be inserted */
+  /** @return the child plan providing tuples to be updated */
   const AbstractPlanNode *GetChildPlan() const {
     BUSTUB_ASSERT(GetChildren().size() == 1, "update should have at most one child plan.");
     return GetChildAt(0);

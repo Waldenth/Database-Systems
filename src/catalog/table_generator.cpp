@@ -16,7 +16,9 @@ std::vector<Value> TableGenerator::GenNumericValues(ColumnInsertMeta *col_meta, 
     }
     return values;
   }
-  std::default_random_engine generator;
+  // std::default_random_engine generator;
+  std::random_device rd;
+  std::mt19937 generator(rd());
   // TODO(Amadou): Break up in two branches if this is too weird.
   std::conditional_t<std::is_integral_v<CppType>, std::uniform_int_distribution<CppType>,
                      std::uniform_real_distribution<CppType>>
@@ -28,7 +30,6 @@ std::vector<Value> TableGenerator::GenNumericValues(ColumnInsertMeta *col_meta, 
 }
 
 std::vector<Value> TableGenerator::MakeValues(ColumnInsertMeta *col_meta, uint32_t count) {
-  std::vector<Value> values;
   switch (col_meta->type_) {
     case TypeId::TINYINT:
       return GenNumericValues<int8_t>(col_meta, count);

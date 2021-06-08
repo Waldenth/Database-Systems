@@ -37,7 +37,7 @@ class DeletePlanNode : public AbstractPlanNode {
   /** @return the identifier of the table that should be deleted from */
   table_oid_t TableOid() const { return table_oid_; }
 
-  /** @return the child plan providing tuples to be inserted */
+  /** @return the child plan providing tuples to be deleted */
   const AbstractPlanNode *GetChildPlan() const {
     BUSTUB_ASSERT(GetChildren().size() == 1, "delete should have at most one child plan.");
     return GetChildAt(0);

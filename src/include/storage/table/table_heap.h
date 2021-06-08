@@ -93,7 +93,7 @@ class TableHeap {
   /**
    * Read a tuple from the table.
    * @param rid rid of the tuple to read
-   * @param tuple output variable for the tuple
+   * @param[out] tuple output variable for the tuple
    * @param txn transaction performing the read
    * @return true if the read was successful (i.e. the tuple exists)
    */
