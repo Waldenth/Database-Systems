@@ -38,12 +38,16 @@ class ExecutionEngine {
     // prepare
     executor->Init();
 
+    // insert / update / delete execution should not add result to result set
+    auto should_ignore_result_set = plan->GetType() == PlanType::Insert || plan->GetType() == PlanType::Update ||
+                                    plan->GetType() == PlanType::Delete;
+
     // execute
     try {
       Tuple tuple;
       RID rid;
       while (executor->Next(&tuple, &rid)) {
-        if (result_set != nullptr) {
+        if (!should_ignore_result_set && result_set != nullptr) {
           result_set->push_back(tuple);
         }
       }

@@ -17,7 +17,7 @@ Projects
 - [x] [C++ Primer](https://15445.courses.cs.cmu.edu/fall2020/project0/) [[auto graded result](./auto-graded-result/Project0-C++Primer.jpg)]
 - [x] [Buffer Pool Manager](https://15445.courses.cs.cmu.edu/fall2020/project1/) [[auto graded result](./auto-graded-result/Project1-BufferPoolManager.jpg)]
 - [x] [B+Tree Index](https://15445.courses.cs.cmu.edu/fall2020/project2/) [[auto graded result for checkpoint 1](./auto-graded-result/Project2c1-BPlusTreeIndex.jpg)] [[auto graded result for checkpoint 2, not 💯 ](./auto-graded-result/Project2c2-BPlusTreeIndex.jpg)]
-- [ ] [Query Execution](https://15445.courses.cs.cmu.edu/fall2020/project3/)
+- [x] [Query Execution](https://15445.courses.cs.cmu.edu/fall2020/project3/) [[auto graded result](./auto-graded-result/Project3-QueryExecution.jpg)]
 - [ ] [Concurrency Control](https://15445.courses.cs.cmu.edu/fall2020/project4/)
 
 projects can be auto-graded on [gradescope](https://www.gradescope.com/courses/195440) via [access code 5VX7JZ](https://github.com/cmu-db/bustub/issues/111#issuecomment-709673126)

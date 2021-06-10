@@ -59,9 +59,6 @@ class IndexScanExecutor : public AbstractExecutor {
   /** Index info identifying the index to be scanned */
   const IndexInfo *index_info_;
 
-  /** Mapping of column index from table schema to output schema */
-  std::vector<uint32_t> map_;
-
   std::unique_ptr<INDEXITERATOR_TYPE> index_iter{nullptr};
 };
 }  // namespace bustub

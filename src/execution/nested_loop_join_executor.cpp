@@ -24,27 +24,7 @@ NestedLoopJoinExecutor::NestedLoopJoinExecutor(ExecutorContext *exec_ctx, const 
     : AbstractExecutor(exec_ctx),
       plan_{plan},
       left_executor_{std::move(left_executor)},
-      right_executor_{std::move(right_executor)} {
-  auto left_cols = left_executor_->GetOutputSchema()->GetColumns();
-  auto right_cols = right_executor_->GetOutputSchema()->GetColumns();
-  auto final_cols = plan_->OutputSchema()->GetColumns();
-
-  std::transform(
-      final_cols.begin(), final_cols.end(), std::back_inserter(map_), [&left_cols, &right_cols](auto final_col) {
-        auto left_it = std::find_if(left_cols.begin(), left_cols.end(),
-                                    [&final_col](auto col) { return col.GetName() == final_col.GetName(); });
-        if (left_it != left_cols.end()) {
-          return std::make_pair(0, left_it - left_cols.begin());
-        }
-
-        auto right_it = std::find_if(right_cols.begin(), right_cols.end(),
-                                     [&final_col](auto col) { return col.GetName() == final_col.GetName(); });
-        if (right_it != right_cols.end()) {
-          return std::make_pair(1, right_it - right_cols.begin());
-        }
-        UNREACHABLE("Column in nested loop join output schema does not exist in either left table or right table");
-      });
-}
+      right_executor_{std::move(right_executor)} {}
 
 void NestedLoopJoinExecutor::Init() {
   left_executor_->Init();
@@ -70,12 +50,14 @@ bool NestedLoopJoinExecutor::Next(Tuple *tuple, RID *rid) {
                                                                 &right_tuple, right_executor_->GetOutputSchema())
                                                  .GetAs<bool>());
 
+  // populate output tuple
   std::vector<Value> values;
-  std::transform(map_.begin(), map_.end(), std::back_inserter(values),
+  std::transform(plan_->OutputSchema()->GetColumns().begin(), plan_->OutputSchema()->GetColumns().end(),
+                 std::back_inserter(values),
                  [&left_tuple = left_tuple, &left_executor = left_executor_, &right_tuple,
-                  &right_executor = right_executor_](auto pair) {
-                   return pair.first == 0 ? left_tuple.GetValue(left_executor->GetOutputSchema(), pair.second)
-                                          : right_tuple.GetValue(right_executor->GetOutputSchema(), pair.second);
+                  &right_executor = right_executor_](const Column &col) {
+                   return col.GetExpr()->EvaluateJoin(&left_tuple, left_executor->GetOutputSchema(), &right_tuple,
+                                                      right_executor->GetOutputSchema());
                  });
 
   *tuple = Tuple(values, plan_->OutputSchema());

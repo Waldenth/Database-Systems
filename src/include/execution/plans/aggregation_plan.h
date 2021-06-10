@@ -27,7 +27,7 @@ enum class AggregationType { CountAggregate, SumAggregate, MinAggregate, MaxAggr
 /**
  * AggregationPlanNode represents the various SQL aggregation functions.
  * For example, COUNT(), SUM(), MIN() and MAX().
- * To simplfiy this project, AggregationPlanNode must always have exactly one child.
+ * To simplify this project, AggregationPlanNode must always have exactly one child.
  */
 class AggregationPlanNode : public AbstractPlanNode {
  public:

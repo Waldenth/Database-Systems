@@ -44,5 +44,8 @@ class LimitExecutor : public AbstractExecutor {
   const LimitPlanNode *plan_;
   /** The child executor to obtain value from. */
   std::unique_ptr<AbstractExecutor> child_executor_;
+
+  uint32_t skipped{0};
+  uint32_t emitted{0};
 };
 }  // namespace bustub

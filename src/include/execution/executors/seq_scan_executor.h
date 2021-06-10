@@ -47,9 +47,6 @@ class SeqScanExecutor : public AbstractExecutor {
   /** Metadata identifying the table that should be scanned. */
   const TableMetadata *table_info_;
 
-  /** Mapping of column index from table schema to output schema */
-  std::vector<uint32_t> map_;
-
   std::unique_ptr<TableIterator> table_iter{nullptr};
 };
 }  // namespace bustub
