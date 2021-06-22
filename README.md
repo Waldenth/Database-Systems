@@ -70,7 +70,7 @@ Progress
   - [x] Video
 - [ ] Lecture #16: Concurrency Control Theory
   - [ ] Readings: Chapter 18
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #17: Two-Phase Locking Concurrency Control
   - [x] Readings: Chapter 18.1-18.3, 18.9
   - [ ] Video
