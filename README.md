@@ -71,9 +71,9 @@ Progress
 - [ ] Lecture #16: Concurrency Control Theory
   - [ ] Readings: Chapter 18
   - [x] Video
-- [ ] Lecture #17: Two-Phase Locking Concurrency Control
+- [x] Lecture #17: Two-Phase Locking Concurrency Control
   - [x] Readings: Chapter 18.1-18.3, 18.9
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #18: Timestamp Ordering Concurrency Control
   - [ ] Readings: Chapter 18.5-18.6
   - [ ] Video
