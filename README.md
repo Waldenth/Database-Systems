@@ -72,7 +72,7 @@ Progress
   - [ ] Readings: Chapter 18
   - [ ] Video
 - [ ] Lecture #17: Two-Phase Locking Concurrency Control
-  - [ ] Readings: Chapter 18.1-18.3, 18.9
+  - [x] Readings: Chapter 18.1-18.3, 18.9
   - [ ] Video
 - [ ] Lecture #18: Timestamp Ordering Concurrency Control
   - [ ] Readings: Chapter 18.5-18.6
