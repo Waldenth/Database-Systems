@@ -77,9 +77,9 @@ Progress
 - [x] Lecture #18: Timestamp Ordering Concurrency Control
   - [x] Readings: Chapter 18.5-18.6
   - [x] Video
-- [ ] Lecture #19: Multi-Version Concurrency Control
+- [x] Lecture #19: Multi-Version Concurrency Control
   - [x] Readings: Chapter 18.7-18.8
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #20: Logging Protocols + Schemes
   - [ ] Readings: Chapter 19.1-19.8
   - [ ] Video
