@@ -68,8 +68,8 @@ Progress
   - [x] Video
 - [x] Lecture #15: Query Planning & Optimization II
   - [x] Video
-- [ ] Lecture #16: Concurrency Control Theory
-  - [ ] Readings: Chapter 18
+- [x] Lecture #16: Concurrency Control Theory
+  - [x] Readings: Chapter 18
   - [x] Video
 - [x] Lecture #17: Two-Phase Locking Concurrency Control
   - [x] Readings: Chapter 18.1-18.3, 18.9
