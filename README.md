@@ -81,7 +81,7 @@ Progress
   - [x] Readings: Chapter 18.7-18.8
   - [x] Video
 - [ ] Lecture #20: Logging Protocols + Schemes
-  - [ ] Readings: Chapter 19.1-19.8
+  - [x] Readings: Chapter 19.1-19.8
   - [ ] Video
 - [ ] Lecture #21: Crash Recovery Algorithms
   - [ ] Readings: Chapter 19.1-19.9
