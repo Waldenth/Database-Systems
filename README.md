@@ -80,9 +80,9 @@ Progress
 - [x] Lecture #19: Multi-Version Concurrency Control
   - [x] Readings: Chapter 18.7-18.8
   - [x] Video
-- [ ] Lecture #20: Logging Protocols + Schemes
+- [x] Lecture #20: Logging Protocols + Schemes
   - [x] Readings: Chapter 19.1-19.8
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #21: Crash Recovery Algorithms
   - [ ] Readings: Chapter 19.1-19.9
   - [ ] Video
