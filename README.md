@@ -84,7 +84,7 @@ Progress
   - [x] Readings: Chapter 19.1-19.8
   - [x] Video
 - [ ] Lecture #21: Crash Recovery Algorithms
-  - [ ] Readings: Chapter 19.1-19.9
+  - [x] Readings: Chapter 19.1-19.9
   - [ ] Video
 - [ ] Lecture #22: Introduction to Distributed Databases
   - [ ] Readings: Chapter 20.4-20.5, 21, 23.1-23.4
