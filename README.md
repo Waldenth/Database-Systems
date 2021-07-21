@@ -88,7 +88,7 @@ Progress
   - [x] Video
 - [ ] Lecture #22: Introduction to Distributed Databases
   - [ ] Readings: Chapter 20.4-20.5, 21, 23.1-23.4
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #23: Distributed OLTP Database Systems
   - [ ] Readings: Chapter 20.4-20.5, 21, 23.1-23.4
   - [ ] Video
