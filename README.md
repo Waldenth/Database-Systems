@@ -91,7 +91,7 @@ Progress
   - [x] Video
 - [ ] Lecture #23: Distributed OLTP Database Systems
   - [ ] Readings: Chapter 20.4-20.5, 21, 23.1-23.4
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #24: Distributed OLAP Database Systems
   - [ ] Readings: Chapter 20.7, 22.9
   - [ ] Video
