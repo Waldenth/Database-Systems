@@ -94,7 +94,7 @@ Progress
   - [x] Video
 - [ ] Lecture #24: Distributed OLAP Database Systems
   - [ ] Readings: Chapter 20.7, 22.9
-  - [ ] Video
+  - [x] Video
 - [ ] Lecture #25: Guest Speaker: Martin Hentschel + Max Heimel
   - [ ] Video
 - [ ] Lecture #26: Final Review / Other Systems
