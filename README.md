@@ -97,5 +97,5 @@ Progress
   - [x] Video
 - [ ] Lecture #25: Guest Speaker: Martin Hentschel + Max Heimel
   - [ ] Video
-- [ ] Lecture #26: Final Review / Other Systems
-  - [ ] Video
+- [x] Lecture #26: Final Review / Other Systems
+  - [x] Video
