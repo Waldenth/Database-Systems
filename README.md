@@ -95,7 +95,7 @@ Progress
 - [ ] Lecture #24: Distributed OLAP Database Systems
   - [ ] Readings: Chapter 20.7, 22.9
   - [x] Video
-- [ ] Lecture #25: Guest Speaker: Martin Hentschel + Max Heimel
-  - [ ] Video
+- [x] Lecture #25: Shasank Chavan (Oracle In-Memory Databases)
+  - [x] Video
 - [x] Lecture #26: Final Review / Other Systems
   - [x] Video
