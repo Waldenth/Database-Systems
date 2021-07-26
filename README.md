@@ -92,8 +92,8 @@ Progress
 - [ ] Lecture #23: Distributed OLTP Database Systems
   - [ ] Readings: Chapter 20.4-20.5, 21, 23.1-23.4
   - [x] Video
-- [ ] Lecture #24: Distributed OLAP Database Systems
-  - [ ] Readings: Chapter 20.7, 22.9
+- [x] Lecture #24: Distributed OLAP Database Systems
+  - [x] Readings: Chapter 20.7, 22.9
   - [x] Video
 - [x] Lecture #25: Shasank Chavan (Oracle In-Memory Databases)
   - [x] Video
