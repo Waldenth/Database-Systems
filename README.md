@@ -8,7 +8,7 @@ assignments at https://15445.courses.cs.cmu.edu/fall2020/assignments.html
 
 video available at [YouTube](https://www.youtube.com/playlist?list=PLSE8ODhjZXjbohkNBWQs_otTrBTrjyohi) for fall 2019
 
-<<Database System Concepts 7e>> online chapters at https://www.db-book.com/db7/online-chapters-dir/index.html
+<Database System Concepts 7e> online chapters at https://www.db-book.com/db7/online-chapters-dir/index.html
 
 ---
 
@@ -61,7 +61,7 @@ Progress
   - [x] Readings: Chapter 15.1-15.3, 15.7
   - [x] Video
 - [x] Lecture #13: Query Execution II
-  - [x] Readings: Chapter 22 (until 22.6)
+  - [x] Readings: Chapter 22
   - [x] Video
 - [x] Lecture #14: Query Planning & Optimization I
   - [x] Readings: Chapter 16
@@ -86,11 +86,11 @@ Progress
 - [x] Lecture #21: Crash Recovery Algorithms
   - [x] Readings: Chapter 19.1-19.9
   - [x] Video
-- [ ] Lecture #22: Introduction to Distributed Databases
-  - [ ] Readings: Chapter 20.4-20.5, 21, 23.1-23.4
+- [x] Lecture #22: Introduction to Distributed Databases
+  - [x] Readings: Chapter 20.4-20.5, 21, 23.1-23.4
   - [x] Video
-- [ ] Lecture #23: Distributed OLTP Database Systems
-  - [ ] Readings: Chapter 20.4-20.5, 21, 23.1-23.4
+- [x] Lecture #23: Distributed OLTP Database Systems
+  - [x] Readings: Chapter 20.4-20.5, 21, 23.1-23.4
   - [x] Video
 - [x] Lecture #24: Distributed OLAP Database Systems
   - [x] Readings: Chapter 20.7, 22.9
