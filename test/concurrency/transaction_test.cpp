@@ -71,6 +71,7 @@ class TransactionTest : public ::testing::Test {
     // Shut down the disk manager and clean up the transaction.
     disk_manager_->ShutDown();
     remove("executor_test.db");
+    remove("executor_test.log");
     delete txn_;
   };
 

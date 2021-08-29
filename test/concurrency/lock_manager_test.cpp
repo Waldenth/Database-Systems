@@ -33,7 +33,7 @@ void CheckTxnLockSize(Transaction *txn, size_t shared_size, size_t exclusive_siz
 
 // Basic shared lock test under REPEATABLE_READ
 void BasicTest1() {
-  LockManager lock_mgr{};
+  LockManager lock_mgr{false};
   TransactionManager txn_mgr{&lock_mgr};
 
   std::vector<RID> rids;
@@ -45,7 +45,6 @@ void BasicTest1() {
     txns.push_back(txn_mgr.Begin());
     EXPECT_EQ(i, txns[i]->GetTransactionId());
   }
-  // test
 
   auto task = [&](int txn_id) {
     bool res;
@@ -54,11 +53,15 @@ void BasicTest1() {
       EXPECT_TRUE(res);
       CheckGrowing(txns[txn_id]);
     }
+    CheckTxnLockSize(txns[txn_id], num_rids, 0);
+
     for (const RID &rid : rids) {
       res = lock_mgr.Unlock(txns[txn_id], rid);
       EXPECT_TRUE(res);
       CheckShrinking(txns[txn_id]);
     }
+    CheckTxnLockSize(txns[txn_id], 0, 0);
+
     txn_mgr.Commit(txns[txn_id]);
     CheckCommitted(txns[txn_id]);
   };
@@ -77,10 +80,61 @@ void BasicTest1() {
     delete txns[i];
   }
 }
-TEST(LockManagerTest, DISABLED_BasicTest) { BasicTest1(); }
+TEST(LockManagerTest, BasicTest1) { BasicTest1(); }
+
+// Basic shared lock test under READ_COMMITTED
+void BasicTest2() {
+  LockManager lock_mgr{false};
+  TransactionManager txn_mgr{&lock_mgr};
+
+  std::vector<RID> rids;
+  std::vector<Transaction *> txns;
+  int num_rids = 10;
+  for (int i = 0; i < num_rids; i++) {
+    RID rid{i, static_cast<uint32_t>(i)};
+    rids.push_back(rid);
+    txns.push_back(txn_mgr.Begin(nullptr, IsolationLevel::READ_COMMITTED));
+    EXPECT_EQ(i, txns[i]->GetTransactionId());
+  }
+
+  auto task = [&](int txn_id) {
+    bool res;
+    for (const RID &rid : rids) {
+      res = lock_mgr.LockShared(txns[txn_id], rid);
+      EXPECT_TRUE(res);
+      CheckGrowing(txns[txn_id]);
+    }
+    CheckTxnLockSize(txns[txn_id], num_rids, 0);
+
+    for (const RID &rid : rids) {
+      res = lock_mgr.Unlock(txns[txn_id], rid);
+      EXPECT_TRUE(res);
+      CheckGrowing(txns[txn_id]);
+    }
+    CheckTxnLockSize(txns[txn_id], 0, 0);
+
+    txn_mgr.Commit(txns[txn_id]);
+    CheckCommitted(txns[txn_id]);
+  };
+  std::vector<std::thread> threads;
+  threads.reserve(num_rids);
+
+  for (int i = 0; i < num_rids; i++) {
+    threads.emplace_back(std::thread{task, i});
+  }
+
+  for (int i = 0; i < num_rids; i++) {
+    threads[i].join();
+  }
+
+  for (int i = 0; i < num_rids; i++) {
+    delete txns[i];
+  }
+}
+TEST(LockManagerTest, BasicTest2) { BasicTest2(); }
 
 void TwoPLTest() {
-  LockManager lock_mgr{};
+  LockManager lock_mgr{false};
   TransactionManager txn_mgr{&lock_mgr};
   RID rid0{0, 0};
   RID rid1{0, 1};
@@ -104,8 +158,11 @@ void TwoPLTest() {
   CheckShrinking(txn);
   CheckTxnLockSize(txn, 0, 1);
 
+  // 2PL check
   try {
     lock_mgr.LockShared(txn, rid0);
+    // should not execute here
+    EXPECT_TRUE(false);
     CheckAborted(txn);
     // Size shouldn't change here
     CheckTxnLockSize(txn, 0, 1);
@@ -123,10 +180,10 @@ void TwoPLTest() {
 
   delete txn;
 }
-TEST(LockManagerTest, DISABLED_TwoPLTest) { TwoPLTest(); }
+TEST(LockManagerTest, TwoPLTest) { TwoPLTest(); }
 
 void UpgradeTest() {
-  LockManager lock_mgr{};
+  LockManager lock_mgr{false};
   TransactionManager txn_mgr{&lock_mgr};
   RID rid{0, 0};
   Transaction txn(0);
@@ -150,10 +207,10 @@ void UpgradeTest() {
   txn_mgr.Commit(&txn);
   CheckCommitted(&txn);
 }
-TEST(LockManagerTest, DISABLED_UpgradeLockTest) { UpgradeTest(); }
+TEST(LockManagerTest, UpgradeLockTest) { UpgradeTest(); }
 
-TEST(LockManagerTest, DISABLED_GraphEdgeTest) {
-  LockManager lock_mgr{};
+TEST(LockManagerTest, GraphEdgeTest) {
+  LockManager lock_mgr{false};
   TransactionManager txn_mgr{&lock_mgr};
   const int num_nodes = 100;
   const int num_edges = num_nodes / 2;
@@ -194,26 +251,193 @@ TEST(LockManagerTest, DISABLED_GraphEdgeTest) {
   }
 }
 
-TEST(LockManagerTest, DISABLED_BasicCycleTest) {
-  LockManager lock_mgr{}; /* Use Deadlock detection */
-  TransactionManager txn_mgr{&lock_mgr};
-
+TEST(LockManagerTest, BasicCycleTest) {
   /*** Create 0->1->0 cycle ***/
-  lock_mgr.AddEdge(0, 1);
-  lock_mgr.AddEdge(1, 0);
-  EXPECT_EQ(2, lock_mgr.GetEdgeList().size());
+  {
+    LockManager lock_mgr{false};
+    TransactionManager txn_mgr{&lock_mgr};
 
-  txn_id_t txn;
-  EXPECT_EQ(true, lock_mgr.HasCycle(&txn));
-  EXPECT_EQ(1, txn);
+    lock_mgr.AddEdge(0, 1);
+    lock_mgr.AddEdge(1, 0);
+    EXPECT_EQ(2, lock_mgr.GetEdgeList().size());
 
-  lock_mgr.RemoveEdge(1, 0);
-  EXPECT_EQ(false, lock_mgr.HasCycle(&txn));
+    txn_id_t txn;
+    EXPECT_EQ(true, lock_mgr.HasCycle(&txn));
+    EXPECT_EQ(1, txn);
+
+    lock_mgr.RemoveEdge(1, 0);
+    EXPECT_EQ(false, lock_mgr.HasCycle(&txn));
+  }
+
+  // 0->1->2->0 cycle
+  {
+    LockManager lock_mgr{false};
+    TransactionManager txn_mgr{&lock_mgr};
+
+    lock_mgr.AddEdge(0, 1);
+    lock_mgr.AddEdge(1, 2);
+    lock_mgr.AddEdge(2, 0);
+
+    EXPECT_EQ(3, lock_mgr.GetEdgeList().size());
+
+    txn_id_t txn;
+    EXPECT_EQ(true, lock_mgr.HasCycle(&txn));
+    EXPECT_EQ(2, txn);
+
+    lock_mgr.RemoveEdge(1, 2);
+    EXPECT_EQ(false, lock_mgr.HasCycle(&txn));
+  }
+
+  // 0->1->2->0 cycle, 3->0
+  {
+    LockManager lock_mgr{false};
+    TransactionManager txn_mgr{&lock_mgr};
+
+    lock_mgr.AddEdge(0, 1);
+    lock_mgr.AddEdge(1, 2);
+    lock_mgr.AddEdge(2, 0);
+    lock_mgr.AddEdge(3, 0);
+
+    EXPECT_EQ(4, lock_mgr.GetEdgeList().size());
+
+    txn_id_t txn;
+    EXPECT_EQ(true, lock_mgr.HasCycle(&txn));
+    EXPECT_EQ(2, txn);
+
+    lock_mgr.RemoveEdge(1, 2);
+    EXPECT_EQ(false, lock_mgr.HasCycle(&txn));
+  }
+
+  // 0->1->2->0 cycle, 2->3
+  {
+    LockManager lock_mgr{false};
+    TransactionManager txn_mgr{&lock_mgr};
+
+    lock_mgr.AddEdge(0, 1);
+    lock_mgr.AddEdge(1, 2);
+    lock_mgr.AddEdge(2, 0);
+    lock_mgr.AddEdge(2, 3);
+
+    EXPECT_EQ(4, lock_mgr.GetEdgeList().size());
+
+    txn_id_t txn;
+    EXPECT_EQ(true, lock_mgr.HasCycle(&txn));
+    EXPECT_EQ(2, txn);
+
+    lock_mgr.RemoveEdge(1, 2);
+    EXPECT_EQ(false, lock_mgr.HasCycle(&txn));
+  }
 }
 
-TEST(LockManagerTest, DISABLED_BasicDeadlockDetectionTest) {
+TEST(LockManagerTest, MultipleCycleTest) {
+  // 0->1->2->0 cycle, 3->4->5->3 cycle
+  {
+    LockManager lock_mgr{false};
+    TransactionManager txn_mgr{&lock_mgr};
+
+    lock_mgr.AddEdge(0, 1);
+    lock_mgr.AddEdge(1, 2);
+    lock_mgr.AddEdge(2, 0);
+    lock_mgr.AddEdge(3, 4);
+    lock_mgr.AddEdge(4, 5);
+    lock_mgr.AddEdge(5, 3);
+
+    EXPECT_EQ(6, lock_mgr.GetEdgeList().size());
+
+    txn_id_t txn;
+    EXPECT_EQ(true, lock_mgr.HasCycle(&txn));
+    EXPECT_EQ(2, txn);
+
+    lock_mgr.RemoveEdge(0, 1);
+
+    EXPECT_EQ(true, lock_mgr.HasCycle(&txn));
+    EXPECT_EQ(5, txn);
+
+    lock_mgr.RemoveEdge(4, 5);
+    EXPECT_EQ(false, lock_mgr.HasCycle(&txn));
+  }
+}
+
+TEST(LockManagerTest, OverlappingCyclesTest) {
+  // 0->1->0 cycle, 1->2->1 cycle
+  {
+    LockManager lock_mgr{false};
+    TransactionManager txn_mgr{&lock_mgr};
+
+    lock_mgr.AddEdge(0, 1);
+    lock_mgr.AddEdge(1, 0);
+    lock_mgr.AddEdge(1, 2);
+    lock_mgr.AddEdge(2, 1);
+
+    EXPECT_EQ(4, lock_mgr.GetEdgeList().size());
+
+    txn_id_t txn;
+    EXPECT_EQ(true, lock_mgr.HasCycle(&txn));
+    EXPECT_EQ(1, txn);
+
+    lock_mgr.RemoveEdge(0, 1);
+
+    EXPECT_EQ(true, lock_mgr.HasCycle(&txn));
+    EXPECT_EQ(2, txn);
+
+    lock_mgr.RemoveEdge(2, 1);
+    EXPECT_EQ(false, lock_mgr.HasCycle(&txn));
+  }
+
+  // 0->1->2->0 cycle, 2->3->4->2 cycle
+  {
+    LockManager lock_mgr{false};
+    TransactionManager txn_mgr{&lock_mgr};
+
+    lock_mgr.AddEdge(0, 1);
+    lock_mgr.AddEdge(1, 2);
+    lock_mgr.AddEdge(2, 0);
+    lock_mgr.AddEdge(2, 3);
+    lock_mgr.AddEdge(3, 4);
+    lock_mgr.AddEdge(4, 2);
+
+    EXPECT_EQ(6, lock_mgr.GetEdgeList().size());
+
+    txn_id_t txn;
+    EXPECT_EQ(true, lock_mgr.HasCycle(&txn));
+    EXPECT_EQ(2, txn);
+
+    lock_mgr.RemoveEdge(0, 1);
+
+    EXPECT_EQ(true, lock_mgr.HasCycle(&txn));
+    EXPECT_EQ(4, txn);
+
+    lock_mgr.RemoveEdge(3, 4);
+    EXPECT_EQ(false, lock_mgr.HasCycle(&txn));
+  }
+
+  // 0->1->2->3->4->5->0 cycle, 2->6->7->2 cycle
+  {
+    LockManager lock_mgr{false};
+    TransactionManager txn_mgr{&lock_mgr};
+
+    lock_mgr.AddEdge(0, 1);
+    lock_mgr.AddEdge(1, 2);
+    lock_mgr.AddEdge(2, 3);
+    lock_mgr.AddEdge(3, 0);
+    // lock_mgr.AddEdge(4, 5);
+    // lock_mgr.AddEdge(5, 0);
+
+    lock_mgr.AddEdge(2, 6);
+    lock_mgr.AddEdge(6, 7);
+    lock_mgr.AddEdge(7, 2);
+
+    EXPECT_EQ(7, lock_mgr.GetEdgeList().size());
+
+    txn_id_t txn;
+    EXPECT_EQ(true, lock_mgr.HasCycle(&txn));
+    EXPECT_EQ(3, txn);
+  }
+}
+
+TEST(LockManagerTest, BasicDeadlockDetectionTest) {
+  cycle_detection_interval = std::chrono::milliseconds(200);
   LockManager lock_mgr{};
-  cycle_detection_interval = std::chrono::milliseconds(500);
   TransactionManager txn_mgr{&lock_mgr};
   RID rid0{0, 0};
   RID rid1{1, 1};
@@ -249,10 +473,11 @@ TEST(LockManagerTest, DISABLED_BasicDeadlockDetectionTest) {
     // This will block
     try {
       res = lock_mgr.LockExclusive(txn1, rid0);
+      EXPECT_TRUE(false);
+      EXPECT_FALSE(res);
       EXPECT_EQ(TransactionState::ABORTED, txn1->GetState());
       txn_mgr.Abort(txn1);
     } catch (TransactionAbortException &e) {
-      // std::cout << e.GetInfo() << std::endl;
       EXPECT_EQ(TransactionState::ABORTED, txn1->GetState());
       txn_mgr.Abort(txn1);
     }

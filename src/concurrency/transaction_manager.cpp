@@ -74,6 +74,7 @@ void TransactionManager::Abort(Transaction *txn) {
     table_write_set->pop_back();
   }
   table_write_set->clear();
+
   // Rollback index updates
   auto index_write_set = txn->GetIndexWriteSet();
   while (!index_write_set->empty()) {
@@ -97,7 +98,6 @@ void TransactionManager::Abort(Transaction *txn) {
     }
     index_write_set->pop_back();
   }
-  table_write_set->clear();
   index_write_set->clear();
 
   // Release all the locks.
