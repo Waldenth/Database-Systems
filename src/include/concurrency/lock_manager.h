@@ -176,6 +176,8 @@ class LockManager {
     return true;
   }
 
+  void StopCycleDetection() { enable_cycle_detection_ = false; }
+
  private:
   void AbortImplicitly(Transaction *txn, AbortReason abort_reason);
   bool ProcessDFSTree(txn_id_t *txn_id, std::stack<txn_id_t> *stack,

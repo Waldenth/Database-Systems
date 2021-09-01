@@ -31,10 +31,12 @@ Transaction *TransactionManager::Begin(Transaction *txn, IsolationLevel isolatio
   }
 
   txn_map[txn->GetTransactionId()] = txn;
+  // LOG_DEBUG("txn: %d begin", txn->GetTransactionId());
   return txn;
 }
 
 void TransactionManager::Commit(Transaction *txn) {
+  // LOG_DEBUG("txn: %d to commit", txn->GetTransactionId());
   txn->SetState(TransactionState::COMMITTED);
 
   // Perform all deletes before we commit.
@@ -57,6 +59,7 @@ void TransactionManager::Commit(Transaction *txn) {
 }
 
 void TransactionManager::Abort(Transaction *txn) {
+  // LOG_DEBUG("txn: %d to abort", txn->GetTransactionId());
   txn->SetState(TransactionState::ABORTED);
   // Rollback before releasing the lock.
   auto table_write_set = txn->GetWriteSet();

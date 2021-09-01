@@ -38,6 +38,34 @@ bool NestedLoopJoinExecutor::Next(Tuple *tuple, RID *rid) {
     return false;
   }
 
+  // lock on to-read left rid
+  switch (exec_ctx_->GetTransaction()->GetIsolationLevel()) {
+    case IsolationLevel::READ_UNCOMMITTED:
+      // no S lock
+      break;
+    case IsolationLevel::READ_COMMITTED:
+      if (!exec_ctx_->GetTransaction()->IsSharedLocked(left_rid) &&
+          !exec_ctx_->GetTransaction()->IsExclusiveLocked(left_rid) &&
+          !(
+              // S lock
+              exec_ctx_->GetLockManager()->LockShared(exec_ctx_->GetTransaction(), left_rid) &&
+              // but release immediately
+              exec_ctx_->GetLockManager()->Unlock(exec_ctx_->GetTransaction(), left_rid))) {
+        return false;
+      }
+      break;
+    case IsolationLevel::REPEATABLE_READ:
+      if (!exec_ctx_->GetTransaction()->IsSharedLocked(left_rid) &&
+          !exec_ctx_->GetTransaction()->IsExclusiveLocked(left_rid) &&
+          // S lock
+          !exec_ctx_->GetLockManager()->LockShared(exec_ctx_->GetTransaction(), left_rid)) {
+        return false;
+      }
+      break;
+    default:
+      break;
+  }
+
   // fetch next qualified left tuple and right tuple pair
   Tuple right_tuple;
   RID right_rid;
@@ -49,6 +77,34 @@ bool NestedLoopJoinExecutor::Next(Tuple *tuple, RID *rid) {
                                                  ->EvaluateJoin(&left_tuple, left_executor_->GetOutputSchema(),
                                                                 &right_tuple, right_executor_->GetOutputSchema())
                                                  .GetAs<bool>());
+
+  // lock on to-read rid
+  switch (exec_ctx_->GetTransaction()->GetIsolationLevel()) {
+    case IsolationLevel::READ_UNCOMMITTED:
+      // no S lock
+      break;
+    case IsolationLevel::READ_COMMITTED:
+      if (!exec_ctx_->GetTransaction()->IsSharedLocked(right_rid) &&
+          !exec_ctx_->GetTransaction()->IsExclusiveLocked(right_rid) &&
+          !(
+              // S lock
+              exec_ctx_->GetLockManager()->LockShared(exec_ctx_->GetTransaction(), right_rid) &&
+              // but release immediately
+              exec_ctx_->GetLockManager()->Unlock(exec_ctx_->GetTransaction(), right_rid))) {
+        return false;
+      }
+      break;
+    case IsolationLevel::REPEATABLE_READ:
+      if (!exec_ctx_->GetTransaction()->IsSharedLocked(right_rid) &&
+          !exec_ctx_->GetTransaction()->IsExclusiveLocked(right_rid) &&
+          // S lock
+          !exec_ctx_->GetLockManager()->LockShared(exec_ctx_->GetTransaction(), right_rid)) {
+        return false;
+      }
+      break;
+    default:
+      break;
+  }
 
   // populate output tuple
   std::vector<Value> values;

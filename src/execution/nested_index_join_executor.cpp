@@ -42,6 +42,49 @@ bool NestIndexJoinExecutor::Next(Tuple *tuple, RID *rid) {
                  ->EvaluateJoin(&left_tuple, plan_->OuterTableSchema(), &right_raw_tuple, &(inner_table_info_->schema_))
                  .GetAs<bool>()));
 
+  // lock on to-read left and right rid
+  switch (exec_ctx_->GetTransaction()->GetIsolationLevel()) {
+    case IsolationLevel::READ_UNCOMMITTED:
+      // no S lock
+      break;
+    case IsolationLevel::READ_COMMITTED:
+      if (!exec_ctx_->GetTransaction()->IsSharedLocked(left_rid) &&
+          !exec_ctx_->GetTransaction()->IsExclusiveLocked(left_rid) &&
+          !(
+              // S lock
+              exec_ctx_->GetLockManager()->LockShared(exec_ctx_->GetTransaction(), left_rid) &&
+              // but release immediately
+              exec_ctx_->GetLockManager()->Unlock(exec_ctx_->GetTransaction(), left_rid))) {
+        return false;
+      }
+      if (!exec_ctx_->GetTransaction()->IsSharedLocked(right_raw_tuple.GetRid()) &&
+          !exec_ctx_->GetTransaction()->IsExclusiveLocked(right_raw_tuple.GetRid()) &&
+          !(
+              // S lock
+              exec_ctx_->GetLockManager()->LockShared(exec_ctx_->GetTransaction(), right_raw_tuple.GetRid()) &&
+              // but release immediately
+              exec_ctx_->GetLockManager()->Unlock(exec_ctx_->GetTransaction(), right_raw_tuple.GetRid()))) {
+        return false;
+      }
+      break;
+    case IsolationLevel::REPEATABLE_READ:
+      if (!exec_ctx_->GetTransaction()->IsSharedLocked(left_rid) &&
+          !exec_ctx_->GetTransaction()->IsExclusiveLocked(left_rid) &&
+          // S lock
+          !exec_ctx_->GetLockManager()->LockShared(exec_ctx_->GetTransaction(), left_rid)) {
+        return false;
+      }
+      if (!exec_ctx_->GetTransaction()->IsSharedLocked(right_raw_tuple.GetRid()) &&
+          !exec_ctx_->GetTransaction()->IsExclusiveLocked(right_raw_tuple.GetRid()) &&
+          // S lock
+          !exec_ctx_->GetLockManager()->LockShared(exec_ctx_->GetTransaction(), right_raw_tuple.GetRid())) {
+        return false;
+      }
+      break;
+    default:
+      break;
+  }
+
   // populate output tuple
   std::vector<Value> values;
   std::transform(plan_->OutputSchema()->GetColumns().begin(), plan_->OutputSchema()->GetColumns().end(),

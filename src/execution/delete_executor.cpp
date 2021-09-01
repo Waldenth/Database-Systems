@@ -34,16 +34,30 @@ bool DeleteExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) {
     return false;
   }
 
+  // lock on to-delete rid first
+  if (exec_ctx_->GetTransaction()->IsSharedLocked(emit_rid)) {
+    // upgrade S lock to X lock
+    if (!exec_ctx_->GetLockManager()->LockUpgrade(exec_ctx_->GetTransaction(), emit_rid)) {
+      return false;
+    }
+  } else if (!exec_ctx_->GetTransaction()->IsExclusiveLocked(emit_rid) &&
+             // accquire X lock if not held
+             !exec_ctx_->GetLockManager()->LockExclusive(exec_ctx_->GetTransaction(), emit_rid)) {
+    return false;
+  }
+
   bool marked = table_info_->table_->MarkDelete(emit_rid, exec_ctx_->GetTransaction());
 
   if (marked) {
-    std::for_each(
-        table_indexes.begin(), table_indexes.end(),
-        [&to_delete_tuple, &emit_rid, &table_schema = table_info_->schema_, &ctx = exec_ctx_](IndexInfo *index) {
-          index->index_->DeleteEntry(
-              to_delete_tuple.KeyFromTuple(table_schema, index->key_schema_, index->index_->GetKeyAttrs()), emit_rid,
-              ctx->GetTransaction());
-        });
+    std::for_each(table_indexes.begin(), table_indexes.end(),
+                  [&to_delete_tuple, &emit_rid, &table_info = table_info_, &ctx = exec_ctx_](IndexInfo *index) {
+                    index->index_->DeleteEntry(to_delete_tuple.KeyFromTuple(table_info->schema_, index->key_schema_,
+                                                                            index->index_->GetKeyAttrs()),
+                                               emit_rid, ctx->GetTransaction());
+                    ctx->GetTransaction()->GetIndexWriteSet()->emplace_back(emit_rid, table_info->oid_, WType::DELETE,
+                                                                            to_delete_tuple, Tuple{}, index->index_oid_,
+                                                                            ctx->GetCatalog());
+                  });
   }
 
   return marked;

@@ -40,4 +40,5 @@ zip -r project4-submission.zip \
     src/execution/aggregation_executor.cpp \
     src/storage/index/b_plus_tree_index.cpp \
     src/concurrency/lock_manager.cpp \
-    src/include/concurrency/lock_manager.h
+    src/include/concurrency/lock_manager.h \
+    src/include/concurrency/transaction.h

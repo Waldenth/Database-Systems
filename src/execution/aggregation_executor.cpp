@@ -33,6 +33,32 @@ void AggregationExecutor::Init() {
   Tuple tuple;
   RID rid;
   while (child_->Next(&tuple, &rid)) {
+    // lock on to-read rid
+    switch (exec_ctx_->GetTransaction()->GetIsolationLevel()) {
+      case IsolationLevel::READ_UNCOMMITTED:
+        // no S lock
+        break;
+      case IsolationLevel::READ_COMMITTED:
+        if (!exec_ctx_->GetTransaction()->IsSharedLocked(rid) && !exec_ctx_->GetTransaction()->IsExclusiveLocked(rid) &&
+            !(
+                // S lock
+                exec_ctx_->GetLockManager()->LockShared(exec_ctx_->GetTransaction(), rid) &&
+                // but release immediately
+                exec_ctx_->GetLockManager()->Unlock(exec_ctx_->GetTransaction(), rid))) {
+          return;
+        }
+        break;
+      case IsolationLevel::REPEATABLE_READ:
+        if (!exec_ctx_->GetTransaction()->IsSharedLocked(rid) && !exec_ctx_->GetTransaction()->IsExclusiveLocked(rid) &&
+            // S lock
+            !exec_ctx_->GetLockManager()->LockShared(exec_ctx_->GetTransaction(), rid)) {
+          return;
+        }
+        break;
+      default:
+        break;
+    }
+
     aht_.InsertCombine(MakeKey(&tuple), MakeVal(&tuple));
   }
 

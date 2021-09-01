@@ -489,6 +489,10 @@ TEST(LockManagerTest, BasicDeadlockDetectionTest) {
   t0.join();
   t1.join();
 
+  lock_mgr.StopCycleDetection();
+
+  std::this_thread::sleep_for(cycle_detection_interval);
+
   delete txn0;
   delete txn1;
 }

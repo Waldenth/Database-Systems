@@ -26,6 +26,8 @@ void LockManager::AbortImplicitly(Transaction *txn, AbortReason abort_reason) {
 }
 
 bool LockManager::LockShared(Transaction *txn, const RID &rid) {
+  // LOG_DEBUG("try to lock shared on rid: %d, %d by txn: %d", rid.GetPageId(), rid.GetSlotNum(),
+  // txn->GetTransactionId());
   if (txn->GetIsolationLevel() == IsolationLevel::READ_UNCOMMITTED) {
     AbortImplicitly(txn, AbortReason::LOCKSHARED_ON_READ_UNCOMMITTED);
     return false;
@@ -33,6 +35,9 @@ bool LockManager::LockShared(Transaction *txn, const RID &rid) {
   if (txn->GetIsolationLevel() == IsolationLevel::REPEATABLE_READ && txn->GetState() == TransactionState::SHRINKING) {
     AbortImplicitly(txn, AbortReason::LOCK_ON_SHRINKING);
     return false;
+  }
+  if (txn->IsSharedLocked(rid) || txn->IsExclusiveLocked(rid)) {
+    return true;
   }
 
   std::unique_lock<std::mutex> l(latch_);
@@ -57,15 +62,22 @@ bool LockManager::LockShared(Transaction *txn, const RID &rid) {
   // grant
   lock_request.granted_ = true;
 
-  txn->GetSharedLockSet()->emplace(rid);
+  if (!txn->IsExclusiveLocked(rid)) {
+    txn->GetSharedLockSet()->emplace(rid);
+  }
 
   return true;
 }
 
 bool LockManager::LockExclusive(Transaction *txn, const RID &rid) {
+  // LOG_DEBUG("try to lock exclusive on rid: %d, %d by txn: %d", rid.GetPageId(), rid.GetSlotNum(),
+  //           txn->GetTransactionId());
   if (txn->GetState() == TransactionState::SHRINKING) {
     AbortImplicitly(txn, AbortReason::LOCK_ON_SHRINKING);
     return false;
+  }
+  if (txn->IsExclusiveLocked(rid)) {
+    return true;
   }
 
   std::unique_lock<std::mutex> l(latch_);
@@ -96,9 +108,14 @@ bool LockManager::LockExclusive(Transaction *txn, const RID &rid) {
 }
 
 bool LockManager::LockUpgrade(Transaction *txn, const RID &rid) {
+  // LOG_DEBUG("try to lock upgrade on rid: %d, %d by txn: %d", rid.GetPageId(), rid.GetSlotNum(),
+  //           txn->GetTransactionId());
   if (txn->GetState() == TransactionState::SHRINKING) {
     AbortImplicitly(txn, AbortReason::LOCK_ON_SHRINKING);
     return false;
+  }
+  if (txn->IsExclusiveLocked(rid)) {
+    return true;
   }
 
   std::unique_lock<std::mutex> l(latch_);
@@ -123,6 +140,7 @@ bool LockManager::LockUpgrade(Transaction *txn, const RID &rid) {
   BUSTUB_ASSERT(!txn->IsExclusiveLocked(rid), "Rid is currently exclusive locked by transaction when upgrade");
 
   it->lock_mode_ = LockManager::LockMode::EXCLUSIVE;
+  it->granted_ = false;
   // wait
   lock_request_queue.cv_.wait(queue_latch, [&lock_request_queue, &lock_request = *it, &txn] {
     return LockManager::IsLockCompatible(lock_request_queue, lock_request) ||
@@ -145,6 +163,7 @@ bool LockManager::LockUpgrade(Transaction *txn, const RID &rid) {
 }
 
 bool LockManager::Unlock(Transaction *txn, const RID &rid) {
+  // LOG_DEBUG("try to unlock on rid: %d, %d by txn: %d", rid.GetPageId(), rid.GetSlotNum(), txn->GetTransactionId());
   std::unique_lock<std::mutex> l(latch_);
   auto &lock_request_queue = lock_table_[rid];
   l.unlock();
@@ -168,8 +187,6 @@ bool LockManager::Unlock(Transaction *txn, const RID &rid) {
       LockManager::IsLockCompatible(lock_request_queue, *following_it)) {
     lock_request_queue.cv_.notify_all();
   }
-
-  queue_latch.unlock();
 
   txn->GetSharedLockSet()->erase(rid);
   txn->GetExclusiveLockSet()->erase(rid);

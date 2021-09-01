@@ -549,7 +549,7 @@ TEST_F(ExecutorTest, SimpleUpdateTest) {
 
   auto original_colB_value = indexed_tuple.GetValue(out_schema1, out_schema1->GetColIdx("colB")).GetAs<int32_t>();
 
-  // UPDATE test_1 SET colB = colB + 1  WHERE colA == 50
+  // UPDATE test_1 SET colB = colB + 1  WHERE colA = 50
   std::unique_ptr<AbstractPlanNode> update_plan1;
   std::unordered_map<uint32_t, UpdateInfo> update_attrs1{{1, {UpdateType::Add, 1}}};
   { update_plan1 = std::make_unique<UpdatePlanNode>(scan_plan1.get(), table_info->oid_, update_attrs1); }

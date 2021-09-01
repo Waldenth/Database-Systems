@@ -39,6 +39,34 @@ bool IndexScanExecutor::Next(Tuple *tuple, RID *rid) {
   } while (plan_->GetPredicate() != nullptr &&
            !plan_->GetPredicate()->Evaluate(&raw_tuple, &(table_info_->schema_)).GetAs<bool>());
 
+  // lock on to-read rid
+  switch (exec_ctx_->GetTransaction()->GetIsolationLevel()) {
+    case IsolationLevel::READ_UNCOMMITTED:
+      // no S lock
+      break;
+    case IsolationLevel::READ_COMMITTED:
+      if (!exec_ctx_->GetTransaction()->IsSharedLocked(raw_tuple.GetRid()) &&
+          !exec_ctx_->GetTransaction()->IsExclusiveLocked(raw_tuple.GetRid()) &&
+          !(
+              // S lock
+              exec_ctx_->GetLockManager()->LockShared(exec_ctx_->GetTransaction(), raw_tuple.GetRid()) &&
+              // but release immediately
+              exec_ctx_->GetLockManager()->Unlock(exec_ctx_->GetTransaction(), raw_tuple.GetRid()))) {
+        return false;
+      }
+      break;
+    case IsolationLevel::REPEATABLE_READ:
+      if (!exec_ctx_->GetTransaction()->IsSharedLocked(raw_tuple.GetRid()) &&
+          !exec_ctx_->GetTransaction()->IsExclusiveLocked(raw_tuple.GetRid()) &&
+          // S lock
+          !exec_ctx_->GetLockManager()->LockShared(exec_ctx_->GetTransaction(), raw_tuple.GetRid())) {
+        return false;
+      }
+      break;
+    default:
+      break;
+  }
+
   // populate output tuple
   std::vector<Value> values;
   std::transform(plan_->OutputSchema()->GetColumns().begin(), plan_->OutputSchema()->GetColumns().end(),
