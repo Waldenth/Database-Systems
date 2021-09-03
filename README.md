@@ -14,11 +14,11 @@ video available at [YouTube](https://www.youtube.com/playlist?list=PLSE8ODhjZXjb
 
 Projects
 
-- [x] [C++ Primer](https://15445.courses.cs.cmu.edu/fall2020/project0/) [[auto graded result](./auto-graded-result/Project0-C++Primer.jpg)]
-- [x] [Buffer Pool Manager](https://15445.courses.cs.cmu.edu/fall2020/project1/) [[auto graded result](./auto-graded-result/Project1-BufferPoolManager.jpg)]
-- [x] [B+Tree Index](https://15445.courses.cs.cmu.edu/fall2020/project2/) [[auto graded result for checkpoint 1](./auto-graded-result/Project2c1-BPlusTreeIndex.jpg)] [[auto graded result for checkpoint 2, not 💯 ](./auto-graded-result/Project2c2-BPlusTreeIndex.jpg)]
-- [x] [Query Execution](https://15445.courses.cs.cmu.edu/fall2020/project3/) [[auto graded result](./auto-graded-result/Project3-QueryExecution.jpg)]
-- [x] [Concurrency Control](https://15445.courses.cs.cmu.edu/fall2020/project4/) [[auto graded result](./auto-graded-result/Project4-ConcurrencyControl.jpg)]
+- [x] [C++ Primer](https://15445.courses.cs.cmu.edu/fall2020/project0/) [[auto graded result](./auto-graded-result/Project0-C++Primer.jpg)] [no leader board]
+- [x] [Buffer Pool Manager](https://15445.courses.cs.cmu.edu/fall2020/project1/) [[auto graded result](./auto-graded-result/Project1-BufferPoolManager.jpg)] [[leader board #266](./auto-graded-result/Project1-Leaderboard.jpg)]
+- [x] [B+Tree Index](https://15445.courses.cs.cmu.edu/fall2020/project2/) [[auto graded result for checkpoint 1](./auto-graded-result/Project2c1-BPlusTreeIndex.jpg)] [[auto graded result for checkpoint 2](./auto-graded-result/Project2c2-BPlusTreeIndex.jpg)] [[leader board #18](./auto-graded-result/Project2-Leaderboard.jpg)]
+- [x] [Query Execution](https://15445.courses.cs.cmu.edu/fall2020/project3/) [[auto graded result](./auto-graded-result/Project3-QueryExecution.jpg)] [[leader board #6](./auto-graded-result/Project3-Leaderboard.jpg)]
+- [x] [Concurrency Control](https://15445.courses.cs.cmu.edu/fall2020/project4/) [[auto graded result](./auto-graded-result/Project4-ConcurrencyControl.jpg)] [no leader board]
 
 projects can be auto-graded on [gradescope](https://www.gradescope.com/courses/195440) via [access code 5VX7JZ](https://github.com/cmu-db/bustub/issues/111#issuecomment-709673126)
 

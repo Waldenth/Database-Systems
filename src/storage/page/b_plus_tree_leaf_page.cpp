@@ -139,9 +139,9 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::CopyNFrom(MappingType *items, int size) {
  */
 INDEX_TEMPLATE_ARGUMENTS
 bool B_PLUS_TREE_LEAF_PAGE_TYPE::Lookup(const KeyType &key, ValueType *value, const KeyComparator &comparator) const {
-  auto k_it = std::find_if(array, array + GetSize(),
-                           [&comparator, &key](const auto &pair) { return comparator(pair.first, key) == 0; });
-  if (k_it == array + GetSize()) {
+  auto k_it = std::lower_bound(array, array + GetSize(), key,
+                               [&comparator](const auto &pair, auto k) { return comparator(pair.first, k) < 0; });
+  if (k_it == array + GetSize() || comparator(k_it->first, key) != 0) {
     return false;
   }
 
@@ -160,9 +160,9 @@ bool B_PLUS_TREE_LEAF_PAGE_TYPE::Lookup(const KeyType &key, ValueType *value, co
  */
 INDEX_TEMPLATE_ARGUMENTS
 int B_PLUS_TREE_LEAF_PAGE_TYPE::RemoveAndDeleteRecord(const KeyType &key, const KeyComparator &comparator) {
-  auto k_it = std::find_if(array, array + GetSize(),
-                           [&comparator, &key](const auto &pair) { return comparator(pair.first, key) == 0; });
-  if (k_it == array + GetSize()) {
+  auto k_it = std::lower_bound(array, array + GetSize(), key,
+                               [&comparator](const auto &pair, auto k) { return comparator(pair.first, k) < 0; });
+  if (k_it == array + GetSize() || comparator(k_it->first, key) != 0) {
     return GetSize();
   }
 
